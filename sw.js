@@ -1,5 +1,8 @@
-// Service worker: cache-first, faz a Calculadora de Calda funcionar 100% offline.
-const CACHE = 'calda-v1';
+// GERADO por build-app.mjs. Nao edite a mao.
+// Versao: 80e844fa1892
+// HTML: network-first (atualiza sozinho quando online, cai no cache se offline).
+// Estaticos: cache-first (icones e manifest nao mudam).
+const CACHE = 'calda-80e844fa1892';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-180.png'
@@ -19,13 +22,33 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+function ehPagina(req) {
+  return req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
+}
+
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+
+  // A pagina em si vai na rede primeiro, para o usuario receber atualizacao.
+  if (ehPagina(e.request)) {
+    e.respondWith(
+      fetch(e.request)
+        .then((resp) => {
+          const copia = resp.clone();
+          caches.open(CACHE).then((c) => c.put('./index.html', copia)).catch(() => {});
+          return resp;
+        })
+        .catch(() => caches.match('./index.html').then((hit) => hit || caches.match('./')))
+    );
+    return;
+  }
+
+  // Resto (icones, manifest): cache primeiro, que nao muda e economiza rede.
   e.respondWith(
     caches.match(e.request).then((hit) => hit || fetch(e.request).then((resp) => {
-      const copy = resp.clone();
-      caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+      const copia = resp.clone();
+      caches.open(CACHE).then((c) => c.put(e.request, copia)).catch(() => {});
       return resp;
-    }).catch(() => caches.match('./index.html')))
+    }))
   );
 });
