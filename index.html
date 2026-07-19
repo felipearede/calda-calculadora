@@ -204,7 +204,7 @@
       <summary><h2>Resultado · onde cada elemento caiu</h2><span class="chev" aria-hidden="true">▸</span></summary>
       <div class="legend">
         <span class="chip ok">verde = faixa ótima</span><span class="chip lo">acima do ótimo</span><span class="chip hi">⛔ passou do teto</span><span class="chip chipmid">na barra: acima do ótimo, ainda abaixo do teto</span>
-        <span>acima do ótimo ≠ tóxico · cinza = sem dado</span>
+        <span>acima do ótimo ≠ tóxico · cinza = sem dado · <b>teto só aparece onde existe dose-resposta feita em cannabis</b> (N, Mg e B). Nos micros não existe esse estudo, então não invento limite.</span>
       </div>
       <div class="tablewrap"><table id="ppmTable"><thead><tr><th>Elem.</th><th>Alvo</th><th>Final</th><th>Teto</th><th style="text-align:left">Onde caiu</th><th>status</th></tr></thead><tbody></tbody></table></div>
       <div class="avisos" id="avisos"></div>
@@ -299,12 +299,12 @@ const REF={
   Ca:{otimo:null,       teto:null, fonte:'nenhuma', cap:'não existe estudo de dose-resposta de Ca em cannabis'},
   Mg:{otimo:[35,70],    teto:140,  fonte:'ciencia', cap:'ótimo 35–70 · declínio acima de 70 · dano a 140 · ciência cannabis'},
   S :{otimo:null,       teto:null, fonte:'nenhuma', cap:'subproduto dos sulfatos · sem estudo dedicado em cannabis'},
-  Fe:{otimo:[1.7,3.5],  teto:5,    fonte:'analogia',cap:'ótimo 1,7–3,5 · teto por analogia horticultural'},
-  Mn:{otimo:[0.5,0.9],  teto:1.5,  fonte:'analogia',cap:'ótimo 0,5–0,9 · teto por analogia horticultural'},
-  Zn:{otimo:[0.1,0.4],  teto:0.5,  fonte:'analogia',cap:'ótimo 0,1–0,4 · teto por analogia · excesso reduz canabinoides'},
+  Fe:{otimo:[1.7,3.5],  teto:null, fonte:'nenhuma', cap:'ótimo 1,7–3,5 · sem dose-resposta de toxicidade em cannabis'},
+  Mn:{otimo:[0.5,0.9],  teto:null, fonte:'nenhuma', cap:'ótimo 0,5–0,9 · sem dose-resposta de toxicidade em cannabis'},
+  Zn:{otimo:[0.1,0.4],  teto:null, fonte:'nenhuma', cap:'ótimo 0,1–0,4 · sem limiar em cannabis · excesso reduz canabinoides'},
   B :{otimo:[0.1,1.0],  teto:2,    fonte:'ciencia', cap:'ótimo 0,1–1,0 · toxicidade ~2 documentada em cannabis · janela estreita'},
-  Cu:{otimo:[0.03,0.18],teto:0.3,  fonte:'analogia',cap:'ótimo 0,03–0,18 · teto por analogia · Cu é dos mais fitotóxicos'},
-  Mo:{otimo:[0.02,0.1], teto:0.25, fonte:'analogia',cap:'ótimo 0,02–0,1 · teto por analogia · toxicidade rara'},
+  Cu:{otimo:[0.03,0.18],teto:null, fonte:'nenhuma', cap:'ótimo 0,03–0,18 · sem dose-resposta de toxicidade em cannabis'},
+  Mo:{otimo:[0.02,0.1], teto:null, fonte:'nenhuma', cap:'ótimo 0,02–0,1 · sem dose-resposta de toxicidade em cannabis'},
 };
 const NOMES={N:'Nitrogênio',P:'Fósforo',K:'Potássio',Ca:'Cálcio',Mg:'Magnésio',S:'Enxofre',Fe:'Ferro',Mn:'Manganês',Zn:'Zinco',B:'Boro',Cu:'Cobre',Mo:'Molibdênio'};
 const LSKEY='calda_receitas_v2';
