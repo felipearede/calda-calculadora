@@ -204,7 +204,7 @@
       <summary><h2>Resultado · onde cada elemento caiu</h2><span class="chev" aria-hidden="true">▸</span></summary>
       <div class="legend">
         <span class="chip ok">verde = faixa ótima</span><span class="chip lo">acima do ótimo</span><span class="chip hi">⛔ passou do teto</span><span class="chip chipmid">na barra: acima do ótimo, ainda abaixo do teto</span>
-        <span>acima do ótimo ≠ tóxico · cinza = sem dado · <b>teto só aparece onde existe dose-resposta feita em cannabis</b> (N, Mg e B). Nos micros não existe esse estudo, então não invento limite.</span>
+        <span>acima do ótimo ≠ tóxico · cinza = sem dado · <b>todo teto vem de estudo em cannabis</b> (~ = limiar aproximado). Ca, S, P, K e Mo aparecem com — porque ninguém mediu onde começa o dano.</span>
       </div>
       <div class="tablewrap"><table id="ppmTable"><thead><tr><th>Elem.</th><th>Alvo</th><th>Final</th><th>Teto</th><th style="text-align:left">Onde caiu</th><th>status</th></tr></thead><tbody></tbody></table></div>
       <div class="avisos" id="avisos"></div>
@@ -278,11 +278,21 @@ const BUILTIN={
       f8:A(117,76,211,97,74,89,2.0,1.24,1.24,0.50,0.17,0.02),
       f9:A(36,70,195,0,69,83,1.83,1.15,1.15,0.46,0.16,0.02)}},
   athena:{nome:'Clone Athena',builtin:true,
-    fases:[{k:'veg',n:'Vegetativo'},{k:'f17',n:'Flor W1-7'},{k:'f89',n:'Flor W8-9 (fade)'}],
+    fases:[{k:'veg',n:'Vegetativo'},{k:'f17',n:'Flor W1-7'},{k:'f89',n:'Flor W8-9 (fade)'},{k:'f89sf',n:'Flor W8-9 (sem fade)'}],
     perfis:{
       veg:A(211,71,337,207,61,162,2.88,0.31,0.12,0.18,0.12,0.024),
       f17:A(171,106,404,207,61,183,2.88,0.31,0.12,0.18,0.12,0.024),
-      f89:A(0,106,404,46,61,183,2.7,0.14,0.05,0.12,0.06,0.008)}},
+      f89:A(0,106,404,46,61,183,2.7,0.14,0.05,0.12,0.06,0.008),
+      f89sf:A(80,49,187,97,28,85,1.34,0.14,0.057,0.085,0.057,0.011)}},
+  athenabl:{nome:'Clone Athena Blended',builtin:true,
+    fases:[{k:'veg',n:'Vegetativo'},{k:'f12',n:'Flor W1-2'},{k:'f34',n:'Flor W3-4 (pico)'},{k:'f56',n:'Flor W5-6'},{k:'f7',n:'Flor W7'},{k:'f89',n:'Flor W8-9 (fade)'}],
+    perfis:{
+      veg:A(195,43,167,170,48,43,2.76,0.45,0.16,0.35,0.17,0.024),
+      f12:A(202,124,376,147,68,71,2.98,0.50,0.17,0.38,0.19,0.027),
+      f34:A(202,148,433,147,81,92,2.98,0.50,0.17,0.38,0.19,0.027),
+      f56:A(163,140,398,120,80,93,2.47,0.39,0.14,0.30,0.15,0.021),
+      f7:A(95,104,281,74,65,75,1.61,0.20,0.070,0.16,0.076,0.011),
+      f89:A(0,64,153,147,35,55,2.21,0.44,0.17,0.37,0.18,0.026)}},
   bernstein:{nome:'Clone Bernstein',builtin:true,
     fases:[{k:'ciclo',n:'Ciclo todo'}],
     perfis:{ciclo:A(160,30,175,110,50,85,1.7,0.8,0.4,0.10,0.04,0.03)}},
@@ -293,18 +303,18 @@ const BUILTIN={
 
 // Referência por elemento: faixa ótima, teto de toxicidade, procedência e legenda.
 const REF={
-  N :{otimo:[140,180],  teto:240,  fonte:'ciencia', cap:'ótimo 140–180 · dano 240–320 · ciência cannabis'},
-  P :{otimo:[20,40],    teto:null, fonte:'parcial', cap:'ótimo 30 · testado sem dano até 90 · acima disso ninguém testou'},
-  K :{otimo:[60,175],   teto:null, fonte:'ciencia', cap:'funcional 60–175 · não limitou até 240 · K não tem ótimo definido'},
+  N :{otimo:[140,180],  teto:240,  fonte:'ciencia', cap:'ótimo 140–180 · dano 240–320 · Saloner 2020'},
+  P :{otimo:[20,40],    teto:null, fonte:'parcial', cap:'ótimo 30 · sem dano até 90 · acima ninguém testou · Shiponi 2021'},
+  K :{otimo:[60,175],   teto:null, fonte:'ciencia', cap:'funcional 60–175 · não limitou até 240 · Saloner 2022'},
   Ca:{otimo:null,       teto:null, fonte:'nenhuma', cap:'não existe estudo de dose-resposta de Ca em cannabis'},
-  Mg:{otimo:[35,70],    teto:140,  fonte:'ciencia', cap:'ótimo 35–70 · declínio acima de 70 · dano a 140 · ciência cannabis'},
+  Mg:{otimo:[35,70],    teto:140,  fonte:'ciencia', cap:'ótimo 35–70 · declínio acima de 70 · dano a 140 · Morad 2023'},
   S :{otimo:null,       teto:null, fonte:'nenhuma', cap:'subproduto dos sulfatos · sem estudo dedicado em cannabis'},
-  Fe:{otimo:[1.7,3.5],  teto:null, fonte:'nenhuma', cap:'ótimo 1,7–3,5 · sem dose-resposta de toxicidade em cannabis'},
-  Mn:{otimo:[0.5,0.9],  teto:null, fonte:'nenhuma', cap:'ótimo 0,5–0,9 · sem dose-resposta de toxicidade em cannabis'},
-  Zn:{otimo:[0.1,0.4],  teto:null, fonte:'nenhuma', cap:'ótimo 0,1–0,4 · sem limiar em cannabis · excesso reduz canabinoides'},
-  B :{otimo:[0.1,1.0],  teto:2,    fonte:'ciencia', cap:'ótimo 0,1–1,0 · toxicidade ~2 documentada em cannabis · janela estreita'},
-  Cu:{otimo:[0.03,0.18],teto:null, fonte:'nenhuma', cap:'ótimo 0,03–0,18 · sem dose-resposta de toxicidade em cannabis'},
-  Mo:{otimo:[0.02,0.1], teto:null, fonte:'nenhuma', cap:'ótimo 0,02–0,1 · sem dose-resposta de toxicidade em cannabis'},
+  Fe:{otimo:[1.7,4],    teto:16,   fonte:'aprox',   cap:'ótimo 1,7–4 · 12–14 sem dano na floração (Frontiers 2024)'},
+  Mn:{otimo:[0.5,1.0],  teto:4,    fonte:'aprox',   cap:'ótimo 0,5–1 · seguro a 2 · tóxico a 9,9 (Cockson 2019)'},
+  Zn:{otimo:[0.1,0.4],  teto:4,    fonte:'ciencia', cap:'ótimo ~0,35 p/ canabinoide · acima disso THCA e CBDA caem · toxicidade só a 4 (Bernstein 2026)'},
+  B :{otimo:[0.5,1.0],  teto:4.5,  fonte:'aprox',   cap:'ótimo 0,5–1 · seguro a 2 · tóxico a 4,87 (Cockson 2019) · janela estreita'},
+  Cu:{otimo:[0.05,0.2], teto:0.8,  fonte:'aprox',   cap:'ótimo 0,05–0,2 · seguro a 0,38 · tóxico a 1,27'},
+  Mo:{otimo:[0.01,0.05],teto:null, fonte:'nenhuma', cap:'ótimo 0,01–0,05 · nunca testado acima de 0,04 em cannabis'},
 };
 const NOMES={N:'Nitrogênio',P:'Fósforo',K:'Potássio',Ca:'Cálcio',Mg:'Magnésio',S:'Enxofre',Fe:'Ferro',Mn:'Manganês',Zn:'Zinco',B:'Boro',Cu:'Cobre',Mo:'Molibdênio'};
 const LSKEY='calda_receitas_v2';
@@ -404,7 +414,7 @@ function gotoFase(nf){ fase=nf; $('#fase').value=nf; checkedSalts.clear(); if(mo
 
 // ===================== FAIXAS / BARRAS =====================
 const nnum=(x)=>br(String(+x));
-function tetoTxt(e){ const r=REF[e]; return r.teto==null?'—':(r.fonte==='analogia'?'~':'')+nnum(r.teto); }
+function tetoTxt(e){ const r=REF[e]; return r.teto==null?'—':((r.fonte==='analogia'||r.fonte==='aprox')?'~':'')+nnum(r.teto); }
 function statusDe(e,v){
   const r=REF[e];
   if(r.teto!=null&&v>r.teto)return{k:'passou',cls:'hi',rot:'passou'};
@@ -431,12 +441,13 @@ function barHtml(e,v){
          `<div class="barcap">${r.cap}</div></div>`;
 }
 // fase de B equivalente à fase atual de A: mesma chave, senão mesmo índice, senão a última
+// devolve {k, exata}. exata=false quando caiu no fallback por índice (calendários diferentes)
 function faseEquivalente(rb){
   const fs=fasesDe(rb);
-  if(fs.some(f=>f.k===fase)&&rb.perfis[fase])return fase;
+  if(fs.some(f=>f.k===fase)&&rb.perfis[fase])return {k:fase,exata:true};
   const fa=fasesDe(recAtiva());
   let i=fa.findIndex(f=>f.k===fase); if(i<0)i=0;
-  return fs[Math.min(i,fs.length-1)].k;
+  return {k:fs[Math.min(i,fs.length-1)].k,exata:false};
 }
 
 function compute(){
@@ -487,11 +498,12 @@ function compute(){
   // comparação A vs B
   const bId=$('#recipeB').value;
   if(bId&&receitas[bId]){
-    const recB=receitas[bId], faseB=faseEquivalente(recB);
+    const recB=receitas[bId], fq=faseEquivalente(recB), faseB=fq.k;
     const bsol=solve(recB.perfis[faseB]),bPpm=forward(bsol.g),bEc=ecEst(bPpm,bsol.g.NC);
     const nomeA=recAtiva().nome||receitas[atual].nome;
     $('#cmpTitle').textContent=nomeA+' (A) × '+recB.nome+' (B)';
-    $('#cmpEc').innerHTML=`<b>A</b> ${nomeA}: EC ${br(ec.toFixed(2))} <span style="opacity:.7">(${faseNomeDe(recAtiva(),fase)})</span> &nbsp;·&nbsp; <b>B</b> ${recB.nome}: EC ${br(bEc.toFixed(2))} <span style="opacity:.7">(${faseNomeDe(recB,faseB)})</span>`;
+    const avisoFase=fq.exata?'':`<div class="aviso warn" style="margin-bottom:10px">⚠️ As duas receitas têm calendários diferentes, então não existe fase equivalente. Estou pareando por posição, e a comparação pode estar cruzando momentos distintos do ciclo.</div>`;
+    $('#cmpEc').innerHTML=avisoFase+`<b>A</b> ${nomeA}: EC ${br(ec.toFixed(2))} <span style="opacity:.7">(${faseNomeDe(recAtiva(),fase)})</span> &nbsp;·&nbsp; <b>B</b> ${recB.nome}: EC ${br(bEc.toFixed(2))} <span style="opacity:.7">(${faseNomeDe(recB,faseB)})</span>`;
     $$('.cmpa').forEach(e=>e.textContent='A · '+nomeA);
     $$('.cmpb').forEach(e=>e.textContent='B · '+recB.nome);
     const rr=(p)=>({npk:`${br((p.N/p.K*10).toFixed(1))} : ${br((p.P/p.K*10).toFixed(1))} : 10`,kcamg:p.Mg>0?`${br((p.K/p.Mg).toFixed(1))} : ${br((p.Ca/p.Mg).toFixed(1))} : 1`:'—'});
