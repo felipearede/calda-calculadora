@@ -1,0 +1,431 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calculadora de Calda</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#3c7a4a">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Calda">
+<style>
+  :root{
+    --bg:#eef2ec; --card:#fff; --ink:#182015; --muted:#5b6a55; --line:#d9e1d3; --soft:#eef4ec; --soft2:#f4f7f2;
+    --accent:#3c7a4a; --accent-d:#2f6a3d; --blue:#2e6b8f;
+    --a-bg:#e9eefb; --a-ink:#37488a;
+    --lo-bg:#fbf1da; --lo-ink:#87610f; --ok-bg:#e4f3e8; --ok-ink:#1e6a38; --hi-bg:#fbe9e6; --hi-ink:#a3362b;
+    --shadow:0 1px 2px rgba(20,40,15,.06),0 4px 16px rgba(20,40,15,.05);
+  }
+  @media (prefers-color-scheme:dark){ :root{
+    --bg:#0f130c; --card:#191f13; --ink:#e8eee1; --muted:#9cb091; --line:#2f3a28; --soft:#1e2a1c; --soft2:#161c11;
+    --accent:#6cbd7c; --accent-d:#7fcf8e; --blue:#6db3d8;
+    --a-bg:#1b2337; --a-ink:#9db0e6;
+    --lo-bg:#322710; --lo-ink:#e7c170; --ok-bg:#17301f; --ok-ink:#7ed69a; --hi-bg:#391e1a; --hi-ink:#e69890;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 18px rgba(0,0,0,.25);
+  }}
+  :root[data-theme="dark"]{ --bg:#0f130c; --card:#191f13; --ink:#e8eee1; --muted:#9cb091; --line:#2f3a28; --soft:#1e2a1c; --soft2:#161c11; --accent:#6cbd7c; --accent-d:#7fcf8e; --blue:#6db3d8; --a-bg:#1b2337; --a-ink:#9db0e6; --lo-bg:#322710; --lo-ink:#e7c170; --ok-bg:#17301f; --ok-ink:#7ed69a; --hi-bg:#391e1a; --hi-ink:#e69890; --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 18px rgba(0,0,0,.25); }
+  :root[data-theme="light"]{ --bg:#eef2ec; --card:#fff; --ink:#182015; --muted:#5b6a55; --line:#d9e1d3; --soft:#eef4ec; --soft2:#f4f7f2; --accent:#3c7a4a; --accent-d:#2f6a3d; --blue:#2e6b8f; --a-bg:#e9eefb; --a-ink:#37488a; --lo-bg:#fbf1da; --lo-ink:#87610f; --ok-bg:#e4f3e8; --ok-ink:#1e6a38; --hi-bg:#fbe9e6; --hi-ink:#a3362b; --shadow:0 1px 2px rgba(20,40,15,.06),0 4px 16px rgba(20,40,15,.05); }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;line-height:1.5;font-size:16px}
+  .wrap{max-width:1060px;margin:0 auto;padding:24px 16px 64px}
+  .top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+  h1{font-size:1.4rem;margin:0;letter-spacing:-.01em}
+  .top .tag{color:var(--muted);font-size:.86rem}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+  .bar{padding:14px 16px;margin-bottom:16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field label{font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+  select,input[type=number],input[type=text]{font-family:inherit;font-size:1rem;padding:9px 11px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+  select:focus,input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+  select#recipe{font-weight:700;min-width:190px}
+  .btn{font-family:inherit;font-size:.92rem;font-weight:700;padding:9px 14px;border-radius:10px;cursor:pointer;border:1.5px solid var(--line);background:var(--card);color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .btn.primary:hover{background:var(--accent-d)}
+  .btn.ghost{border-color:transparent;color:var(--muted)}
+  .btn.danger:hover{border-color:var(--hi-ink);color:var(--hi-ink)}
+  .btn[disabled]{opacity:.4;cursor:not-allowed}
+  .spacer{flex:1}
+  .results{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}
+  @media (max-width:860px){ .results{grid-template-columns:1fr} }
+  .sec{padding:16px 18px}
+  .sec h2{font-size:.95rem;margin:0 0 12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+  .ecbox{display:flex;align-items:baseline;gap:12px;background:var(--soft);border-radius:12px;padding:12px 16px;margin-bottom:14px}
+  .ecbox .n{font-size:2rem;font-weight:800;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums}
+  .ecbox .u{color:var(--muted);font-size:.85rem}
+  .ecbox .p5{margin-left:auto;text-align:right;color:var(--muted);font-size:.82rem}
+  .ecbox .p5 b{color:var(--ink);font-size:1.05rem}
+  table{border-collapse:collapse;width:100%}
+  th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left}
+  thead th{font-size:.76rem;color:var(--muted);border-bottom:2px solid var(--line);text-transform:uppercase;letter-spacing:.03em}
+  tbody tr:last-child td{border-bottom:none}
+  .part td{font-weight:700;color:var(--accent);background:var(--soft2);font-size:.82rem;text-transform:uppercase;letter-spacing:.03em}
+  .part.pa td{color:var(--a-ink);background:var(--a-bg)}
+  .saln{font-weight:600}
+  .tot{font-weight:800;font-size:1.02rem}
+  td.alvo{font-weight:600;color:var(--muted)}
+  .idmini{font-size:.72rem;font-weight:400;opacity:.6;margin-left:4px}
+  .tablewrap{overflow-x:auto}
+  #cmpRat th.cmpa,#cmpRat th.cmpb,#cmpPpm th.cmpa,#cmpPpm th.cmpb{max-width:130px;white-space:normal;line-height:1.15;font-size:.72rem}
+  #cmpRat td.v,#cmpPpm td.v{font-weight:800}
+  td.chk{text-align:center}
+  td.chk input{width:20px;height:20px;cursor:pointer;accent-color:var(--accent)}
+  .gl{color:var(--muted);font-size:.9rem}
+  td.v{font-weight:800}
+  .lo{background:var(--lo-bg);color:var(--lo-ink)} .ok{background:var(--ok-bg);color:var(--ok-ink)} .hi{background:var(--hi-bg);color:var(--hi-ink)}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;font-size:.8rem;margin:10px 0 4px;color:var(--muted);align-items:center}
+  .chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:7px;font-weight:700;font-size:.78rem}
+  .avisos{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+  .aviso{border-radius:9px;padding:8px 12px;font-weight:600;font-size:.9rem;background:var(--hi-bg);color:var(--hi-ink)}
+  .aviso.warn{background:var(--lo-bg);color:var(--lo-ink)}
+  /* editor */
+  .editor{padding:16px 18px;margin-bottom:16px;border:1.5px solid var(--accent)}
+  .editor .ehead{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-bottom:14px}
+  .editor .ehead .field{flex:1;min-width:180px}
+  .editor .ehead input#rname{font-weight:700;width:100%}
+  .ppmgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px;margin-bottom:12px}
+  .ppmgrid .pi{display:flex;flex-direction:column;gap:2px}
+  .ppmgrid .pi label{font-size:.72rem;color:var(--muted);font-weight:700}
+  .ppmgrid .pi input{padding:6px 8px;font-size:.94rem;width:100%;font-variant-numeric:tabular-nums}
+  .weeknav{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .weeknav b{font-size:1.05rem;color:var(--accent)}
+  .weeknav .btn{padding:6px 13px;font-size:1rem}
+  .weeknav .ehint{flex-basis:100%;color:var(--muted);font-size:.85rem;margin:0}
+  .ehint{color:var(--muted);font-size:.85rem;margin:0 0 12px}
+  .erow{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;justify-content:space-between}
+  .scalebox{display:flex;gap:8px;align-items:flex-end}
+  .scalebox .field input{width:110px}
+  .eactions{display:flex;gap:8px}
+  .mix{background:var(--a-bg);color:var(--a-ink);border-radius:11px;padding:11px 14px;font-size:.87rem;margin-top:14px}
+  .foot{color:var(--muted);font-size:.78rem;margin-top:24px;border-top:1px solid var(--line);padding-top:12px;line-height:1.5}
+  .hidden{display:none!important}
+</style>
+<div class="wrap">
+  <div class="top">
+    <h1>Calculadora de Calda</h1>
+    <span class="tag">sais → ppm → EC · roda no seu navegador</span>
+  </div>
+
+  <!-- barra de receita -->
+  <div class="card bar" id="recipeBar">
+    <div class="field"><label for="recipe">Receita</label>
+      <select id="recipe"></select>
+    </div>
+    <div class="field"><label for="recipeB">Comparar com</label>
+      <select id="recipeB"><option value="">— nenhuma —</option></select>
+    </div>
+    <div class="field"><label for="fase">Fase / Semana</label>
+      <select id="fase">
+        <option value="veg">Vegetativo</option>
+        <option value="s1">Flor S1</option><option value="s2">Flor S2</option><option value="s3">Flor S3</option>
+        <option value="s47" selected>Flor S4-7</option><option value="s8">Flor S8</option><option value="s9">Flor S9</option>
+      </select>
+    </div>
+    <div class="field"><label for="vol">Volume (L)</label><input id="vol" type="number" value="200" min="1" step="1" style="width:100px"></div>
+    <div class="spacer"></div>
+    <button class="btn primary" id="btnNew">＋ Criar receita</button>
+    <button class="btn" id="btnEdit">Editar</button>
+    <button class="btn danger" id="btnDel">Excluir</button>
+    <button class="btn" id="btnBackup">⤓ Backup</button>
+  </div>
+
+  <!-- backup: exportar/importar receitas (copia e cola, funciona offline) -->
+  <div class="card bar hidden" id="backupBar" style="flex-direction:column;align-items:stretch;gap:8px">
+    <div style="font-weight:700">Backup das suas receitas</div>
+    <div class="gl">Exportar: copie o texto e guarde ou mande pro outro aparelho.</div>
+    <textarea id="expTxt" readonly rows="3" style="width:100%;font-family:monospace;font-size:.78rem;padding:8px;border:1.5px solid var(--line);border-radius:9px;background:var(--soft2);color:var(--ink)"></textarea>
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn" id="btnCopy">copiar</button><span class="gl" id="copyMsg"></span></div>
+    <div class="gl" style="margin-top:6px">Importar: cole um backup aqui e carregue (junta com as suas).</div>
+    <textarea id="impTxt" rows="3" placeholder="cole aqui o backup..." style="width:100%;font-family:monospace;font-size:.78rem;padding:8px;border:1.5px solid var(--line);border-radius:9px;background:var(--card);color:var(--ink)"></textarea>
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn primary" id="btnImport">importar</button><button class="btn ghost" id="btnBackupClose">fechar</button><span class="gl" id="impMsg"></span></div>
+  </div>
+
+  <!-- confirmação de exclusão (inline; confirm() é bloqueado no artifact) -->
+  <div class="card bar hidden" id="delBar" style="border-color:var(--hi-ink)">
+    <span>Excluir <b id="delName"></b>? Não tem desfazer.</span>
+    <div class="spacer"></div>
+    <button class="btn danger" id="delYes">Sim, excluir</button>
+    <button class="btn ghost" id="delNo">Cancelar</button>
+  </div>
+
+  <!-- editor (só aparece ao criar/editar) -->
+  <div class="card editor hidden" id="editor">
+    <div class="ehead">
+      <div class="field"><label for="rname">Nome da receita</label><input id="rname" type="text" placeholder="Minha receita"></div>
+      <div class="scalebox">
+        <div class="field"><label for="ecalvo">Escalar p/ EC</label><input id="ecalvo" type="number" step="0.1" placeholder="ex. 2,0"></div>
+        <button class="btn" id="applyEc">aplicar</button>
+      </div>
+    </div>
+    <div class="weeknav"><button class="btn" id="prevFase" title="semana anterior">◀</button><b id="edFase">Flor S4</b><button class="btn" id="nextFase" title="próxima semana">▶</button><span class="ehint">Alvo em ppm <b>desta semana</b>. Use ◀ ▶ para editar cada fase/semana (Vegetativo, S1 a S9). Os sais e a EC ao lado recalculam na hora.</span></div>
+    <div class="ppmgrid" id="ppmGrid"></div>
+    <div class="erow">
+      <span class="tag" id="edStatus"></span>
+      <div class="eactions">
+        <button class="btn ghost" id="btnCancel">Cancelar</button>
+        <button class="btn primary" id="btnSave">Salvar receita</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- resultados -->
+  <div class="results">
+    <div class="card sec">
+      <h2>Sais a usar <span id="volLabel" class="gl"></span><button class="btn ghost" id="clearChk" style="float:right;padding:4px 10px;font-size:.78rem">limpar ✓</button></h2>
+      <div class="ecbox"><span class="n" id="ecVal">–</span><span class="u">dS/m<br>EC estimada</span><span class="p5">~<b id="ppm500">–</b> ppm<br>escala 500</span></div>
+      <table id="salTable"><thead><tr><th>Sal</th><th>g/L</th><th>Total</th><th title="marque conforme adiciona">✓</th></tr></thead><tbody></tbody></table>
+    </div>
+
+    <div class="card sec">
+      <h2>Relação entre elementos</h2>
+      <table id="ratTable"><thead><tr><th>Relação</th><th>Sua receita</th><th>Ideal</th></tr></thead><tbody></tbody></table>
+      <h2 style="margin-top:18px">Resultado vs ideal</h2>
+      <div class="legend">
+        <span class="chip lo">↓ abaixo</span><span class="chip ok">= ideal</span><span class="chip hi">↑ acima</span>
+        <span>acima ≠ tóxico · ⛔ passou do teto</span>
+      </div>
+      <table id="ppmTable"><thead><tr><th>Elem</th><th>Alvo</th><th>Final <span class="gl" style="font-weight:400">· ideal</span></th></tr></thead><tbody></tbody></table>
+      <div class="avisos" id="avisos"></div>
+    </div>
+  </div>
+
+  <!-- comparação (aparece ao escolher "Comparar com") -->
+  <div class="card sec hidden" id="compareCard" style="margin-top:16px">
+    <h2>Comparação <span class="gl" id="cmpTitle" style="font-weight:400"></span></h2>
+    <div class="gl" id="cmpEc" style="margin-bottom:12px"></div>
+    <h2 style="font-size:.95rem">Relação entre elementos</h2>
+    <div class="tablewrap"><table id="cmpRat"><thead><tr><th>Relação</th><th class="cmpa">A</th><th class="cmpb">B</th><th>Ideal</th></tr></thead><tbody></tbody></table></div>
+    <h2 style="font-size:.95rem;margin-top:16px">Resultado (ppm) · cada uma colorida vs o ideal</h2>
+    <div class="legend"><span class="chip lo">↓ abaixo</span><span class="chip ok">= ideal</span><span class="chip hi">↑ acima</span></div>
+    <div class="tablewrap"><table id="cmpPpm"><thead><tr><th>Elem</th><th class="cmpa">A</th><th class="cmpb">B</th><th>Ideal</th></tr></thead><tbody></tbody></table></div>
+  </div>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+<script>
+// ===================== MOTOR (validado: reproduz BCG310 e Athena) =====================
+const SAIS={
+  NC:{nome:'Nitrato de Cálcio (Calcinit)',frac:{N:0.155,Ca:0.19},nh4:0.071,parte:'A'},
+  NP:{nome:'Nitrato de Potássio (KNO3)',frac:{N:0.13,K:0.382},parte:'B'},
+  MKP:{nome:'Fosfato Monopotássico (MKP)',frac:{P:0.227,K:0.282},parte:'B'},
+  SM:{nome:'Sulfato de Magnésio',frac:{Mg:0.09,S:0.118},parte:'B'},
+  SOP:{nome:'Sulfato de Potássio (SOP)',frac:{K:0.423,S:0.18},parte:'B'},
+  FE:{nome:'Ferro DDHA',frac:{Fe:0.06},parte:'C'},
+  MN:{nome:'Manganês EDTA',frac:{Mn:0.13},parte:'C'},
+  ZN:{nome:'Zinco EDTA',frac:{Zn:0.13},parte:'C'},
+  CU:{nome:'Cobre EDTA',frac:{Cu:0.15},parte:'C'},
+  B:{nome:'Octaborato de Sódio',frac:{B:0.205},parte:'C'},
+  MO:{nome:'Molibdato de Sódio',frac:{Mo:0.39},parte:'C'},
+};
+const MM={N:14.007,P:30.974,K:39.098,Ca:40.078,Mg:24.305,S:32.06};
+const LAM={K:73.5,Ca:119,Mg:106,NH4:73.5,NO3:71.4,SO4:160,H2PO4:33},ACT=0.75;
+const gForPpm=(p,f)=>p/(f*1000),ppmFromG=(g,f)=>g*f*1000;
+function solve(a){
+  const g={NC:0,NP:0,MKP:0,SM:0,SOP:0,FE:0,MN:0,ZN:0,CU:0,B:0,MO:0},av=[];
+  g.NC=gForPpm(a.Ca||0,SAIS.NC.frac.Ca); const nNC=ppmFromG(g.NC,SAIS.NC.frac.N);
+  let nR=(a.N||0)-nNC; if(nR<0){av.push({t:'warn',m:`O N do Nitrato de Cálcio (${nNC.toFixed(0)}) já passa o alvo de N (${a.N}). Não dá pra baixar o N sem reduzir o Cálcio.`});nR=0;}
+  g.NP=gForPpm(nR,SAIS.NP.frac.N); const kNP=ppmFromG(g.NP,SAIS.NP.frac.K);
+  g.MKP=gForPpm(a.P||0,SAIS.MKP.frac.P); const kMKP=ppmFromG(g.MKP,SAIS.MKP.frac.K);
+  let kR=(a.K||0)-kNP-kMKP; if(kR<0){av.push({t:'warn',m:`O K do KNO3 + MKP (${(kNP+kMKP).toFixed(0)}) já passa o alvo de K (${a.K}). Excesso de K.`});kR=0;}
+  g.SOP=gForPpm(kR,SAIS.SOP.frac.K);
+  g.SM=gForPpm(a.Mg||0,SAIS.SM.frac.Mg);
+  g.FE=gForPpm(a.Fe||0,SAIS.FE.frac.Fe);g.MN=gForPpm(a.Mn||0,SAIS.MN.frac.Mn);g.ZN=gForPpm(a.Zn||0,SAIS.ZN.frac.Zn);
+  g.CU=gForPpm(a.Cu||0,SAIS.CU.frac.Cu);g.B=gForPpm(a.B||0,SAIS.B.frac.B);g.MO=gForPpm(a.Mo||0,SAIS.MO.frac.Mo);
+  return {g,av};
+}
+function forward(g){const p={N:0,P:0,K:0,Ca:0,Mg:0,S:0,Fe:0,Mn:0,Zn:0,B:0,Cu:0,Mo:0};for(const s in g){const f=SAIS[s].frac;for(const e in f)p[e]+=ppmFromG(g[s],f[e]);}return p;}
+function ecEst(p,gNC){const mK=p.K/MM.K/1e3,mCa=p.Ca/MM.Ca/1e3,mMg=p.Mg/MM.Mg/1e3,mP=p.P/MM.P/1e3,mS=p.S/MM.S/1e3;const nh4=ppmFromG(gNC,SAIS.NC.frac.N)*SAIS.NC.nh4,mNH4=nh4/MM.N/1e3,mNO3=(p.N/MM.N/1e3)-mNH4;return ACT*(LAM.K*mK+LAM.Ca*mCa+LAM.Mg*mMg+LAM.NH4*mNH4+LAM.NO3*mNO3+LAM.SO4*mS+LAM.H2PO4*mP);}
+
+// ===================== DADOS =====================
+const EL=['N','P','K','Ca','Mg','S','Fe','Mn','Zn','B','Cu','Mo'];
+const FASES=['veg','s1','s2','s3','s47','s8','s9'];
+const FNOME={veg:'Vegetativo',s1:'Flor S1',s2:'Flor S2',s3:'Flor S3',s47:'Flor S4-7',s8:'Flor S8',s9:'Flor S9'};
+const A=(...v)=>{const o={};EL.forEach((e,i)=>o[e]=v[i]);return o;};
+const BUILTIN={
+  bcg:{nome:'Clone BCG310',builtin:true,perfis:{
+    veg:A(169,118,328,133,116,139,3.09,1.93,1.93,0.77,0.27,0.04),s1:A(169,118,328,133,116,139,3.09,1.93,1.93,0.77,0.27,0.04),
+    s2:A(117,76,211,97,74,89,2.0,1.24,1.24,0.5,0.17,0.02),s3:A(141,98,273,111,97,116,2.58,1.61,1.61,0.64,0.23,0.03),
+    s47:A(150,111,308,115,109,131,2.91,1.82,1.82,0.73,0.25,0.04),
+    s8:A(117,76,211,97,74,89,2.0,1.24,1.24,0.5,0.17,0.02),s9:A(36,70,195,0,69,83,1.83,1.15,1.15,0.46,0.16,0.02)}},
+  athena:{nome:'Clone Athena',builtin:true,perfis:{
+    veg:A(212,71,338,207,61,163,3.25,0.49,0.16,0.18,0.12,0.12),
+    s1:A(171,107,405,207,61,183,3.25,0.49,0.16,0.18,0.12,0.12),s2:A(171,107,405,207,61,183,3.25,0.49,0.16,0.18,0.12,0.12),
+    s3:A(171,107,405,207,61,183,3.25,0.49,0.16,0.18,0.12,0.12),s47:A(171,107,405,207,61,183,3.25,0.49,0.16,0.18,0.12,0.12),
+    s8:A(79,50,189,96,28,85,1.63,0.24,0.08,0.09,0.06,0.06),s9:A(79,50,189,96,28,85,1.63,0.24,0.08,0.09,0.06,0.06)}},
+  ciencia:{nome:'Ciência (lean)',builtin:true,perfis:{
+    veg:A(160,30,150,120,50,80,3,0.5,0.2,0.7,0.1,0.06),s1:A(130,30,140,130,55,80,3,0.5,0.2,0.7,0.1,0.06),
+    s2:A(150,30,165,130,55,85,3,0.5,0.2,0.7,0.1,0.06),s3:A(150,35,185,130,55,90,3,0.5,0.2,0.7,0.1,0.06),
+    s47:A(140,40,190,125,55,90,3,0.5,0.2,0.7,0.1,0.06),
+    s8:A(90,30,160,115,50,80,3,0.5,0.2,0.7,0.1,0.06),s9:A(30,10,60,60,25,40,1,0.2,0.08,0.3,0.05,0.03)}},
+};
+// Clone EXATO do BCG310, só o veg com o Mg no mínimo (resto do veg = BCG). A EC do veg cai (~2,0); compensa com menos água.
+BUILTIN.bcgveg={nome:'BCG310 · veg com menos Mg',builtin:true,perfis:Object.assign(structuredClone(BUILTIN.bcg.perfis),{veg:A(169,118,328,133,50,67,3.09,1.93,1.93,0.77,0.27,0.04)})};
+// Volcani (Bernstein): solucao-base do paper de Mg (Morad & Bernstein 2023), com N e P nos otimos (Saloner 2020 N160, Shiponi 2021 P30). O grupo roda solucao ~constante o ciclo todo. Nota: com os sais disponiveis o K sobe (~244) por falta de fonte de amonio.
+BUILTIN.volcani={nome:'Volcani (Bernstein)',builtin:true,perfis:Object.fromEntries(FASES.map(f=>[f,A(160,30,175,110,50,85,1.7,0.8,0.4,0.10,0.04,0.03)]))};
+// Perfeita: razao fixa balanceada escalada pela EC do BCG310 (veg/S1 2,4; S2/S8 1,6; S3 2,0; S4-7 2,2; S9 1,0). Ca-rica p/ segurar N seguro na EC alta.
+BUILTIN.perfeita={nome:'Perfeita · EC BCG',builtin:true,perfis:{
+  veg:A(162,50,278,198,69,182,2.5,0.6,0.35,0.4,0.05,0.04),s1:A(162,50,278,198,69,182,2.5,0.6,0.35,0.4,0.05,0.04),
+  s2:A(108,34,185,132,46,121,2.5,0.6,0.35,0.4,0.05,0.04),s3:A(135,42,232,165,57,151,2.5,0.6,0.35,0.4,0.05,0.04),
+  s47:A(149,46,255,182,63,167,2.5,0.6,0.35,0.4,0.05,0.04),
+  s8:A(108,34,185,132,46,121,2.5,0.6,0.35,0.4,0.05,0.04),s9:A(68,21,116,83,29,76,1.2,0.3,0.18,0.2,0.03,0.02)}};
+const TETO={N:230,P:150,K:350,Ca:220,Mg:130,S:220,Fe:null,Mn:null,Zn:2,B:2,Cu:0.4,Mo:0.2};
+const NOMES={N:'Nitrogênio',P:'Fósforo',K:'Potássio',Ca:'Cálcio',Mg:'Magnésio',S:'Enxofre',Fe:'Ferro',Mn:'Manganês',Zn:'Zinco',B:'Boro',Cu:'Cobre',Mo:'Molibdênio'};
+const LSKEY='calda_receitas_v2';
+
+// ===================== ESTADO =====================
+let receitas={}; // id -> {nome,builtin,perfis}
+let atual='bcg', fase='s47', modo='view', draft=null;
+let checkedSalts=new Set();
+
+const $=(s)=>document.querySelector(s),$$=(s)=>document.querySelectorAll(s);
+const br=(n)=>String(n).replace('.',',');
+const f2=(n)=>{if(n===0)return'0';if(n>=100)return n.toFixed(0);if(n>=10)return n.toFixed(1);if(n>=1)return n.toFixed(2);return n.toFixed(3);};
+
+function loadCustom(){ try{const j=JSON.parse(localStorage.getItem(LSKEY)||'{}');return j;}catch(e){return{};} }
+function saveCustom(){ const c={};for(const id in receitas)if(!receitas[id].builtin)c[id]=receitas[id]; try{localStorage.setItem(LSKEY,JSON.stringify(c));}catch(e){} }
+function initReceitas(){ receitas={};for(const id in BUILTIN)receitas[id]=structuredClone(BUILTIN[id]); const c=loadCustom();for(const id in c)receitas[id]=c[id]; }
+
+function fillRecipeSelect(){
+  const sel=$('#recipe'); sel.innerHTML='';
+  for(const id in receitas){ const o=document.createElement('option');o.value=id;o.textContent=receitas[id].nome+(receitas[id].builtin?'':' ★');sel.appendChild(o); }
+  sel.value=atual;
+  const selB=$('#recipeB');const cur=selB.value;selB.innerHTML='<option value="">— nenhuma —</option>';
+  for(const id in receitas){const o=document.createElement('option');o.value=id;o.textContent=receitas[id].nome+(receitas[id].builtin?'':' ★');selB.appendChild(o);}
+  selB.value=cur;
+}
+function perfilAtivo(){ return (modo==='edit'?draft:receitas[atual]).perfis[fase]; }
+
+function buildPpmInputs(){
+  const g=$('#ppmGrid');g.innerHTML='';
+  EL.forEach(e=>{const d=document.createElement('div');d.className='pi';
+    d.innerHTML=`<label title="${NOMES[e]}">${e}</label><input type="number" step="0.01" data-el="${e}">`;g.appendChild(d);});
+  $$('#ppmGrid input').forEach(inp=>inp.addEventListener('input',()=>{ draft.perfis[fase][inp.dataset.el]=parseFloat(inp.value)||0; compute(); }));
+}
+function syncPpmInputs(){ const p=perfilAtivo(); $$('#ppmGrid input').forEach(inp=>inp.value=p[inp.dataset.el]); }
+
+function updEditDel(){
+  const editing=(modo!=='view'), builtin=receitas[atual].builtin;
+  $('#btnEdit').disabled=editing||builtin;
+  $('#btnDel').disabled=editing||builtin;
+}
+function setModo(m){
+  modo=m;
+  const editing=(m!=='view');
+  $('#editor').classList.toggle('hidden',!editing);
+  $('#recipe').disabled=editing;   // trava troca de receita durante a edição; fase e volume seguem ativos
+  $('#btnNew').disabled=editing;
+  if(editing){ $('#edFase').textContent=FNOME[fase]; syncPpmInputs(); }
+  updEditDel();
+}
+function startNew(){ draft=structuredClone(receitas[atual]); draft.builtin=false; draft.nome=''; $('#rname').value=''; $('#edStatus').textContent='Nova receita a partir de "'+receitas[atual].nome+'"'; setModo('new'); compute(); }
+function startEdit(){ if(receitas[atual].builtin)return; draft=structuredClone(receitas[atual]); $('#rname').value=draft.nome; $('#edStatus').textContent='Editando "'+draft.nome+'"'; setModo('edit'); compute(); }
+function cancelEdit(){ draft=null; setModo('view'); compute(); }
+function saveRecipe(){
+  const nome=($('#rname').value||'').trim(); if(!nome){$('#edStatus').textContent='⚠️ Dá um nome pra receita antes de salvar.';$('#rname').focus();return;}
+  let id=(modo==='edit')?atual:('r'+Object.keys(receitas).length+'_'+nome.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,8));
+  draft.nome=nome;draft.builtin=false; receitas[id]=structuredClone(draft); saveCustom();
+  atual=id;draft=null;setModo('view');fillRecipeSelect();compute();
+}
+function delRecipe(){ if(receitas[atual].builtin)return; $('#delName').textContent=receitas[atual].nome; $('#delBar').classList.remove('hidden'); }
+function confirmDel(){ delete receitas[atual]; saveCustom(); atual='bcg'; $('#delBar').classList.add('hidden'); fillRecipeSelect(); compute(); }
+function cancelDel(){ $('#delBar').classList.add('hidden'); }
+function gotoFase(nf){ fase=nf; $('#fase').value=nf; checkedSalts.clear(); if(modo!=='view'){$('#edFase').textContent=FNOME[nf];syncPpmInputs();} compute(); }
+
+function colorClass(v,ideal){const r=v/ideal;if(!isFinite(r))return'';if(r<0.85)return'lo';if(r>1.15)return'hi';return'ok';}
+
+function compute(){
+  const vol=parseFloat($('#vol').value)||0;
+  const alvo=perfilAtivo();
+  const {g,av}=solve(alvo);
+  const ppm=forward(g);
+  const ec=ecEst(ppm,g.NC);
+  const ideal=receitas.ciencia.perfis[fase];
+
+  $('#ecVal').textContent=br(ec.toFixed(2));
+  $('#ppm500').textContent=(ec*500).toFixed(0);
+  $('#volLabel').textContent=vol?`· ${br(vol)} L`:'';
+
+  // sais por parte
+  const st=$('#salTable tbody');st.innerHTML='';
+  const partes={A:'Parte A · Cálcio (à parte)',B:'Parte B · macros',C:'Parte C · micros'};
+  ['A','B','C'].forEach(P=>{
+    const s=Object.keys(g).filter(x=>SAIS[x].parte===P&&g[x]>0.0005);if(!s.length)return;
+    const hr=document.createElement('tr');hr.className='part'+(P==='A'?' pa':'');hr.innerHTML=`<td colspan="4">${partes[P]}</td>`;st.appendChild(hr);
+    s.forEach(x=>{const tr=document.createElement('tr');tr.innerHTML=`<td class="saln">${SAIS[x].nome}</td><td class="gl">${br(g[x].toFixed(3))}</td><td class="tot">${br((g[x]*vol).toFixed(1))} g</td><td class="chk"><input type="checkbox" data-sal="${x}" ${checkedSalts.has(x)?'checked':''}></td>`;st.appendChild(tr);});
+  });
+
+  // ppm final vs ideal
+  const pt=$('#ppmTable tbody');pt.innerHTML='';
+  const av2=[...av];
+  EL.forEach(e=>{
+    const cls=colorClass(ppm[e],ideal[e]); const over=TETO[e]!=null&&ppm[e]>TETO[e];
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="saln" title="${NOMES[e]}">${e}${over?' ⛔':''}</td><td class="alvo">${f2(alvo[e])}</td><td class="v ${cls}">${f2(ppm[e])}<span class="idmini">${f2(ideal[e])}</span></td>`;
+    pt.appendChild(tr);
+    if(over)av2.push({t:'err',m:`${NOMES[e]} em ${f2(ppm[e])} passou do teto real (${TETO[e]}). Reduza.`});
+  });
+  // relações entre elementos (receita vs ideal)
+  const ratRows=(p)=>({npk:`${(p.N/p.K*10).toFixed(1)} : ${(p.P/p.K*10).toFixed(1)} : 10`, kcamg:(p.Mg>0?`${(p.K/p.Mg).toFixed(1)} : ${(p.Ca/p.Mg).toFixed(1)} : 1`:'—')});
+  const rR=ratRows(ppm), rI=ratRows(ideal);
+  $('#ratTable tbody').innerHTML=
+    `<tr><td class="saln">N : P : K <span class="gl">(K=10)</span></td><td class="v">${rR.npk}</td><td class="gl">${rI.npk}</td></tr>`+
+    `<tr><td class="saln">K : Ca : Mg <span class="gl">(Mg=1)</span></td><td class="v">${rR.kcamg}</td><td class="gl">${rI.kcamg}</td></tr>`+
+    `<tr><td class="gl" style="font-weight:400">nota</td><td colspan="2" class="gl" style="text-align:left">A ciência não define razão ideal p/ cannabis (o 4:2:1 é heurística de floricultura, não Bugbee). Âncoras reais são elementos: N~160, P~30, Mg~35-50; K não tem ótimo.</td></tr>`;
+  if(ppm.Mg>70&&ppm.Mg<=130)av2.push({t:'warn',m:`Mg em ${ppm.Mg.toFixed(0)}: acima do ponto de declínio (70), seguro. Dano claro só a 140.`});
+  const avEl=$('#avisos');avEl.innerHTML='';
+  av2.forEach(a=>{const d=document.createElement('div');d.className='aviso'+(a.t==='warn'?' warn':'');d.textContent=(a.t==='warn'?'⚠️ ':'⛔ ')+a.m;avEl.appendChild(d);});
+
+  // comparação A vs B
+  const bId=$('#recipeB').value;
+  if(bId&&receitas[bId]){
+    const bsol=solve(receitas[bId].perfis[fase]),bPpm=forward(bsol.g),bEc=ecEst(bPpm,bsol.g.NC);
+    $('#cmpTitle').textContent=receitas[atual].nome+' (A) × '+receitas[bId].nome+' (B)';
+    $('#cmpEc').innerHTML=`<b>A</b> ${receitas[atual].nome}: EC ${br(ec.toFixed(2))} &nbsp;·&nbsp; <b>B</b> ${receitas[bId].nome}: EC ${br(bEc.toFixed(2))} <span style="opacity:.7">(fase ${FNOME[fase]})</span>`;
+    $$('.cmpa').forEach(e=>e.textContent='A · '+receitas[atual].nome);
+    $$('.cmpb').forEach(e=>e.textContent='B · '+receitas[bId].nome);
+    const rr=(p)=>({npk:`${(p.N/p.K*10).toFixed(1)} : ${(p.P/p.K*10).toFixed(1)} : 10`,kcamg:p.Mg>0?`${(p.K/p.Mg).toFixed(1)} : ${(p.Ca/p.Mg).toFixed(1)} : 1`:'—'});
+    const ra=rr(ppm),rb=rr(bPpm),ri=rr(ideal);
+    $('#cmpRat tbody').innerHTML=
+      `<tr><td class="saln">N : P : K</td><td class="v">${ra.npk}</td><td class="v">${rb.npk}</td><td class="gl">${ri.npk}</td></tr>`+
+      `<tr><td class="saln">K : Ca : Mg</td><td class="v">${ra.kcamg}</td><td class="v">${rb.kcamg}</td><td class="gl">${ri.kcamg}</td></tr>`;
+    $('#cmpPpm tbody').innerHTML=EL.map(e=>{const ca=colorClass(ppm[e],ideal[e]),cb=colorClass(bPpm[e],ideal[e]);return `<tr><td class="saln">${e}</td><td class="v ${ca}">${f2(ppm[e])}</td><td class="v ${cb}">${f2(bPpm[e])}</td><td class="gl">${f2(ideal[e])}</td></tr>`;}).join('');
+    $('#compareCard').classList.remove('hidden');
+  } else { $('#compareCard').classList.add('hidden'); }
+
+  updEditDel();
+  $('#foot').textContent=`EC estimada por modelo de condutividade (±10-15%). Sais em fração elemental padrão (confira o rótulo real dos seus). "Ideal" = ótimo da ciência (Saloner, Shiponi, Bugbee). ★ = suas receitas salvas. Medir EC e pH na hora continua sendo a verdade.`;
+}
+
+// ===================== EVENTOS =====================
+$('#recipe').addEventListener('change',e=>{atual=e.target.value;checkedSalts.clear();compute();});
+$('#recipeB').addEventListener('change',compute);
+$('#fase').addEventListener('change',e=>{fase=e.target.value;checkedSalts.clear();if(modo!=='view'){$('#edFase').textContent=FNOME[fase];syncPpmInputs();}compute();});
+$('#salTable').addEventListener('change',e=>{const c=e.target;if(c.matches('input[type=checkbox]')){if(c.checked)checkedSalts.add(c.dataset.sal);else checkedSalts.delete(c.dataset.sal);}});
+$('#clearChk').addEventListener('click',()=>{checkedSalts.clear();compute();});
+$('#vol').addEventListener('input',compute);
+$('#btnNew').addEventListener('click',startNew);
+$('#btnEdit').addEventListener('click',startEdit);
+$('#btnDel').addEventListener('click',delRecipe);
+$('#btnSave').addEventListener('click',saveRecipe);
+$('#btnCancel').addEventListener('click',cancelEdit);
+$('#delYes').addEventListener('click',confirmDel);
+$('#delNo').addEventListener('click',cancelDel);
+$('#prevFase').addEventListener('click',()=>{const i=FASES.indexOf(fase);gotoFase(FASES[(i-1+FASES.length)%FASES.length]);});
+$('#nextFase').addEventListener('click',()=>{const i=FASES.indexOf(fase);gotoFase(FASES[(i+1)%FASES.length]);});
+$('#btnBackup').addEventListener('click',()=>{const c={};for(const id in receitas)if(!receitas[id].builtin)c[id]=receitas[id];$('#expTxt').value=Object.keys(c).length?JSON.stringify(c):'(nenhuma receita sua salva ainda)';$('#backupBar').classList.toggle('hidden');$('#copyMsg').textContent='';$('#impMsg').textContent='';});
+$('#btnBackupClose').addEventListener('click',()=>$('#backupBar').classList.add('hidden'));
+$('#btnCopy').addEventListener('click',()=>{const t=$('#expTxt');t.select();t.setSelectionRange(0,99999);let ok=false;try{navigator.clipboard.writeText(t.value);ok=true;}catch(e){try{ok=document.execCommand('copy');}catch(e2){}}$('#copyMsg').textContent=ok?'copiado ✓':'selecione e copie manual';});
+$('#btnImport').addEventListener('click',()=>{try{const o=JSON.parse(($('#impTxt').value||'').trim());let n=0;for(const id in o){if(o[id]&&o[id].perfis&&o[id].nome){o[id].builtin=false;receitas[id]=o[id];n++;}}if(!n){$('#impMsg').textContent='nenhuma receita válida no texto';return;}saveCustom();fillRecipeSelect();$('#impMsg').textContent=n+' receita(s) importada(s) ✓';}catch(e){$('#impMsg').textContent='texto inválido, confira o backup';}});
+$('#applyEc').addEventListener('click',()=>{
+  const alvoEc=parseFloat($('#ecalvo').value);if(!alvoEc||!draft)return;
+  const {g}=solve(draft.perfis[fase]);const ec=ecEst(forward(g),g.NC);if(ec<=0)return;
+  const k=alvoEc/ec;EL.forEach(e=>draft.perfis[fase][e]=+(draft.perfis[fase][e]*k).toFixed(3));
+  syncPpmInputs();compute();
+});
+
+// init
+initReceitas();fillRecipeSelect();buildPpmInputs();setModo('view');compute();
+</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
