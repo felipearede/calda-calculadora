@@ -46,11 +46,17 @@
   .btn.danger:hover{border-color:var(--hi-ink);color:var(--hi-ink)}
   .btn[disabled]{opacity:.4;cursor:not-allowed}
   .spacer{flex:1}
-  .results{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}
+  .results{display:grid;grid-template-columns:1fr;gap:12px}
   .results>.card{min-width:0}
-  @media (max-width:860px){ .results{grid-template-columns:1fr} }
   .sec{padding:16px 18px}
   .sec h2{font-size:.95rem;margin:0 0 12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
+  .sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;border-radius:10px}
+  .sec>summary::-webkit-details-marker{display:none}
+  .sec:not([open])>summary h2{margin-bottom:0}
+  .sec>summary:hover h2{color:var(--ink)}
+  .sec>summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .sec>summary .chev{margin-left:auto;flex:none;color:var(--muted);font-size:.78rem;transition:transform .18s ease}
+  .sec[open]>summary .chev{transform:rotate(90deg)}
   .ecbox{display:flex;align-items:baseline;gap:12px;background:var(--soft);border-radius:12px;padding:12px 16px;margin-bottom:14px}
   .ecbox .n{font-size:2rem;font-weight:800;color:var(--accent);line-height:1;font-variant-numeric:tabular-nums}
   .ecbox .u{color:var(--muted);font-size:.85rem}
@@ -181,36 +187,38 @@
     </div>
   </div>
 
-  <!-- resultados -->
+  <!-- resultados: 4 seções empilhadas, em accordion (fechadas por padrão) -->
   <div class="results">
-    <div class="card sec">
-      <h2>Sais a usar <span id="volLabel" class="gl"></span><button class="btn ghost" id="clearChk" style="float:right;padding:4px 10px;font-size:.78rem">limpar ✓</button></h2>
+    <details class="card sec" data-sec="sais">
+      <summary><h2>Sais a usar <span id="volLabel" class="gl"></span></h2><button class="btn ghost" id="clearChk" style="padding:4px 10px;font-size:.78rem">limpar ✓</button><span class="chev" aria-hidden="true">▸</span></summary>
       <div class="ecbox"><span class="n" id="ecVal">–</span><span class="u">dS/m<br>EC estimada</span><span class="p5">~<b id="ppm500">–</b> ppm<br>escala 500</span></div>
       <table id="salTable"><thead><tr><th>Sal</th><th>g/L</th><th>Total</th><th title="marque conforme adiciona">✓</th></tr></thead><tbody></tbody></table>
-    </div>
+    </details>
 
-    <div class="card sec">
-      <h2>Relação entre elementos</h2>
+    <details class="card sec" data-sec="rel">
+      <summary><h2>Relação entre elementos</h2><span class="chev" aria-hidden="true">▸</span></summary>
       <table id="ratTable"><thead><tr><th>Relação</th><th>Sua receita</th></tr></thead><tbody></tbody></table>
-      <h2 style="margin-top:18px">Resultado · onde cada elemento caiu</h2>
+    </details>
+
+    <details class="card sec" data-sec="res">
+      <summary><h2>Resultado · onde cada elemento caiu</h2><span class="chev" aria-hidden="true">▸</span></summary>
       <div class="legend">
         <span class="chip ok">verde = faixa ótima</span><span class="chip lo">acima do ótimo</span><span class="chip hi">⛔ passou do teto</span><span class="chip chipmid">na barra: acima do ótimo, ainda abaixo do teto</span>
         <span>acima do ótimo ≠ tóxico · cinza = sem dado</span>
       </div>
       <div class="tablewrap"><table id="ppmTable"><thead><tr><th>Elem.</th><th>Alvo</th><th>Final</th><th>Teto</th><th style="text-align:left">Onde caiu</th><th>status</th></tr></thead><tbody></tbody></table></div>
       <div class="avisos" id="avisos"></div>
-    </div>
-  </div>
+    </details>
 
-  <!-- comparação (aparece ao escolher "Comparar com") -->
-  <div class="card sec hidden" id="compareCard" style="margin-top:16px">
-    <h2>Comparação <span class="gl" id="cmpTitle" style="font-weight:400"></span></h2>
-    <div class="gl" id="cmpEc" style="margin-bottom:12px"></div>
-    <h2 style="font-size:.95rem">Relação entre elementos</h2>
-    <div class="tablewrap"><table id="cmpRat"><thead><tr><th>Relação</th><th class="cmpa">A</th><th class="cmpb">B</th></tr></thead><tbody></tbody></table></div>
-    <h2 style="font-size:.95rem;margin-top:16px">Resultado (ppm) · cada uma colorida pela faixa do elemento</h2>
-    <div class="legend"><span class="chip ok">na faixa ótima</span><span class="chip lo">acima do ótimo</span><span class="chip hi">⛔ passou do teto</span></div>
-    <div class="tablewrap"><table id="cmpPpm"><thead><tr><th>Elem</th><th class="cmpa">A</th><th class="cmpb">B</th><th>Teto</th></tr></thead><tbody></tbody></table></div>
+    <details class="card sec hidden" id="compareCard" data-sec="cmp">
+      <summary><h2>Comparação <span class="gl" id="cmpTitle" style="font-weight:400"></span></h2><span class="chev" aria-hidden="true">▸</span></summary>
+      <div class="gl" id="cmpEc" style="margin-bottom:12px"></div>
+      <h2 style="font-size:.95rem">Relação entre elementos</h2>
+      <div class="tablewrap"><table id="cmpRat"><thead><tr><th>Relação</th><th class="cmpa">A</th><th class="cmpb">B</th></tr></thead><tbody></tbody></table></div>
+      <h2 style="font-size:.95rem;margin-top:16px">Resultado (ppm) · cada uma colorida pela faixa do elemento</h2>
+      <div class="legend"><span class="chip ok">na faixa ótima</span><span class="chip lo">acima do ótimo</span><span class="chip hi">⛔ passou do teto</span></div>
+      <div class="tablewrap"><table id="cmpPpm"><thead><tr><th>Elem</th><th class="cmpa">A</th><th class="cmpb">B</th><th>Teto</th></tr></thead><tbody></tbody></table></div>
+    </details>
   </div>
 
   <p class="foot" id="foot"></p>
@@ -471,8 +479,7 @@ function compute(){
   const rR=ratRows(ppm);
   $('#ratTable tbody').innerHTML=
     `<tr><td class="saln">N : P : K <span class="gl">(K=10)</span></td><td class="v">${rR.npk}</td></tr>`+
-    `<tr><td class="saln">K : Ca : Mg <span class="gl">(Mg=1)</span></td><td class="v">${rR.kcamg}</td></tr>`+
-    `<tr><td class="gl" style="font-weight:400">nota</td><td class="gl" style="text-align:left;white-space:normal">A ciência não define razão ideal p/ cannabis. O 4:2:1 vem da floricultura de poinsétia (NC State/Whipker), não do Bugbee. O Bugbee roda K:Ca:Mg ~12,7:6,3:1 e diz que razão é consequência, não regra. Âncoras reais são elementos: N~160, P~30, Mg~35-70; K não tem ótimo.</td></tr>`;
+    `<tr><td class="saln">K : Ca : Mg <span class="gl">(Mg=1)</span></td><td class="v">${rR.kcamg}</td></tr>`;
   if(ppm.Mg>70&&ppm.Mg<=REF.Mg.teto)av2.push({t:'warn',m:`Mg em ${ppm.Mg.toFixed(0)}: acima do ponto de declínio (70), seguro. Dano claro só a 140.`});
   const avEl=$('#avisos');avEl.innerHTML='';
   av2.forEach(a=>{const d=document.createElement('div');d.className='aviso'+(a.t==='warn'?' warn':'');d.textContent=(a.t==='warn'?'⚠️ ':'⛔ ')+a.m;avEl.appendChild(d);});
@@ -505,7 +512,7 @@ $('#recipe').addEventListener('change',e=>{cancelDel();atual=e.target.value;chec
 $('#recipeB').addEventListener('change',compute);
 $('#fase').addEventListener('change',e=>{fase=e.target.value;checkedSalts.clear();if(modo!=='view'){$('#edFase').textContent=faseNomeDe(recAtiva(),fase);syncPpmInputs();}compute();});
 $('#salTable').addEventListener('change',e=>{const c=e.target;if(c.matches('input[type=checkbox]')){if(c.checked)checkedSalts.add(c.dataset.sal);else checkedSalts.delete(c.dataset.sal);}});
-$('#clearChk').addEventListener('click',()=>{checkedSalts.clear();compute();});
+$('#clearChk').addEventListener('click',(e)=>{e.preventDefault();e.stopPropagation();checkedSalts.clear();compute();});
 $('#vol').addEventListener('input',compute);
 $('#btnNew').addEventListener('click',startNew);
 $('#btnEdit').addEventListener('click',startEdit);
@@ -528,7 +535,16 @@ $('#applyEc').addEventListener('click',()=>{
   syncPpmInputs();compute();
 });
 
+// ===================== ACCORDION (lembra seção aberta/fechada) =====================
+const SECKEY='calda_secoes_v1';
+function loadSecoes(){ try{return JSON.parse(localStorage.getItem(SECKEY)||'{}');}catch(e){return{};} }
+function saveSecoes(){ try{const o={};$$('[data-sec]').forEach(d=>{o[d.dataset.sec]=d.open;});localStorage.setItem(SECKEY,JSON.stringify(o));}catch(e){} }
+function initSecoes(){
+  const st=loadSecoes();
+  $$('[data-sec]').forEach(d=>{ d.open=!!st[d.dataset.sec]; d.addEventListener('toggle',saveSecoes); });
+}
+
 // init
-initReceitas();if(!receitas[atual])atual='bcg';fillRecipeSelect();fillFaseSelect();buildPpmInputs();setModo('view');compute();
+initReceitas();if(!receitas[atual])atual='bcg';fillRecipeSelect();fillFaseSelect();buildPpmInputs();setModo('view');compute();initSecoes();
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
