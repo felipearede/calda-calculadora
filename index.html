@@ -47,6 +47,7 @@
   .btn[disabled]{opacity:.4;cursor:not-allowed}
   .spacer{flex:1}
   .results{display:grid;grid-template-columns:1.05fr .95fr;gap:16px}
+  .results>.card{min-width:0}
   @media (max-width:860px){ .results{grid-template-columns:1fr} }
   .sec{padding:16px 18px}
   .sec h2{font-size:.95rem;margin:0 0 12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:700}
@@ -65,8 +66,21 @@
   .saln{font-weight:600}
   .tot{font-weight:800;font-size:1.02rem}
   td.alvo{font-weight:600;color:var(--muted)}
-  .idmini{font-size:.72rem;font-weight:400;opacity:.6;margin-left:4px}
   .tablewrap{overflow-x:auto}
+  #ppmTable{min-width:560px}
+  #ppmTable th,#ppmTable td{padding:7px 8px;vertical-align:top}
+  td.barcell{text-align:left}
+  .barwrap{position:relative;min-width:170px;padding-top:17px}
+  .track{position:relative;height:11px;border-radius:6px;background:var(--line);overflow:hidden}
+  .z{position:absolute;top:0;bottom:0;display:block}
+  .zlo{background:rgba(70,140,190,.35)}
+  .zok{background:rgba(55,160,90,.5)}
+  .zmid{background:rgba(205,150,45,.32)}
+  .zhi{background:rgba(200,70,55,.38)}
+  .mk{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--ink);border-radius:1px}
+  .bal{position:absolute;top:0;transform:translateX(-50%);font-size:.7rem;font-weight:800;line-height:1.35;padding:0 5px;border-radius:6px;white-space:nowrap;background:var(--soft);color:var(--muted)}
+  .barcap{font-size:11px;color:var(--muted);line-height:1.3;margin-top:5px;white-space:normal;text-align:left;max-width:270px;font-variant-numeric:normal}
+  td.st .chip{font-size:.72rem}
   #cmpRat th.cmpa,#cmpRat th.cmpb,#cmpPpm th.cmpa,#cmpPpm th.cmpb{max-width:130px;white-space:normal;line-height:1.15;font-size:.72rem}
   #cmpRat td.v,#cmpPpm td.v{font-weight:800}
   td.chk{text-align:center}
@@ -74,6 +88,8 @@
   .gl{color:var(--muted);font-size:.9rem}
   td.v{font-weight:800}
   .lo{background:var(--lo-bg);color:var(--lo-ink)} .ok{background:var(--ok-bg);color:var(--ok-ink)} .hi{background:var(--hi-bg);color:var(--hi-ink)}
+  .nd{background:var(--soft);color:var(--muted)}
+  .chipmid{background:rgba(205,150,45,.32);color:var(--ink)}
   .legend{display:flex;flex-wrap:wrap;gap:8px;font-size:.8rem;margin:10px 0 4px;color:var(--muted);align-items:center}
   .chip{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:7px;font-weight:700;font-size:.78rem}
   .avisos{margin-top:12px;display:flex;flex-direction:column;gap:6px}
@@ -116,11 +132,7 @@
       <select id="recipeB"><option value="">— nenhuma —</option></select>
     </div>
     <div class="field"><label for="fase">Fase / Semana</label>
-      <select id="fase">
-        <option value="veg">Vegetativo</option>
-        <option value="s1">Flor S1</option><option value="s2">Flor S2</option><option value="s3">Flor S3</option>
-        <option value="s47" selected>Flor S4-7</option><option value="s8">Flor S8</option><option value="s9">Flor S9</option>
-      </select>
+      <select id="fase"></select>
     </div>
     <div class="field"><label for="vol">Volume (L)</label><input id="vol" type="number" value="200" min="1" step="1" style="width:100px"></div>
     <div class="spacer"></div>
@@ -158,7 +170,7 @@
         <button class="btn" id="applyEc">aplicar</button>
       </div>
     </div>
-    <div class="weeknav"><button class="btn" id="prevFase" title="semana anterior">◀</button><b id="edFase">Flor S4</b><button class="btn" id="nextFase" title="próxima semana">▶</button><span class="ehint">Alvo em ppm <b>desta semana</b>. Use ◀ ▶ para editar cada fase/semana (Vegetativo, S1 a S9). Os sais e a EC ao lado recalculam na hora.</span></div>
+    <div class="weeknav"><button class="btn" id="prevFase" title="semana anterior">◀</button><b id="edFase">–</b><button class="btn" id="nextFase" title="próxima semana">▶</button><span class="ehint">Alvo em ppm <b>desta fase</b>. Use ◀ ▶ para andar pelas fases desta receita. Os sais e a EC ao lado recalculam na hora.</span></div>
     <div class="ppmgrid" id="ppmGrid"></div>
     <div class="erow">
       <span class="tag" id="edStatus"></span>
@@ -179,13 +191,13 @@
 
     <div class="card sec">
       <h2>Relação entre elementos</h2>
-      <table id="ratTable"><thead><tr><th>Relação</th><th>Sua receita</th><th>Ideal</th></tr></thead><tbody></tbody></table>
-      <h2 style="margin-top:18px">Resultado vs ideal</h2>
+      <table id="ratTable"><thead><tr><th>Relação</th><th>Sua receita</th></tr></thead><tbody></tbody></table>
+      <h2 style="margin-top:18px">Resultado · onde cada elemento caiu</h2>
       <div class="legend">
-        <span class="chip lo">↓ abaixo</span><span class="chip ok">= ideal</span><span class="chip hi">↑ acima</span>
-        <span>acima ≠ tóxico · ⛔ passou do teto</span>
+        <span class="chip ok">verde = faixa ótima</span><span class="chip lo">acima do ótimo</span><span class="chip hi">⛔ passou do teto</span><span class="chip chipmid">na barra: acima do ótimo, ainda abaixo do teto</span>
+        <span>acima do ótimo ≠ tóxico · cinza = sem dado</span>
       </div>
-      <table id="ppmTable"><thead><tr><th>Elem</th><th>Alvo</th><th>Final <span class="gl" style="font-weight:400">· ideal</span></th></tr></thead><tbody></tbody></table>
+      <div class="tablewrap"><table id="ppmTable"><thead><tr><th>Elem.</th><th>Alvo</th><th>Final</th><th>Teto</th><th style="text-align:left">Onde caiu</th><th>status</th></tr></thead><tbody></tbody></table></div>
       <div class="avisos" id="avisos"></div>
     </div>
   </div>
@@ -195,10 +207,10 @@
     <h2>Comparação <span class="gl" id="cmpTitle" style="font-weight:400"></span></h2>
     <div class="gl" id="cmpEc" style="margin-bottom:12px"></div>
     <h2 style="font-size:.95rem">Relação entre elementos</h2>
-    <div class="tablewrap"><table id="cmpRat"><thead><tr><th>Relação</th><th class="cmpa">A</th><th class="cmpb">B</th><th>Ideal</th></tr></thead><tbody></tbody></table></div>
-    <h2 style="font-size:.95rem;margin-top:16px">Resultado (ppm) · cada uma colorida vs o ideal</h2>
-    <div class="legend"><span class="chip lo">↓ abaixo</span><span class="chip ok">= ideal</span><span class="chip hi">↑ acima</span></div>
-    <div class="tablewrap"><table id="cmpPpm"><thead><tr><th>Elem</th><th class="cmpa">A</th><th class="cmpb">B</th><th>Ideal</th></tr></thead><tbody></tbody></table></div>
+    <div class="tablewrap"><table id="cmpRat"><thead><tr><th>Relação</th><th class="cmpa">A</th><th class="cmpb">B</th></tr></thead><tbody></tbody></table></div>
+    <h2 style="font-size:.95rem;margin-top:16px">Resultado (ppm) · cada uma colorida pela faixa do elemento</h2>
+    <div class="legend"><span class="chip ok">na faixa ótima</span><span class="chip lo">acima do ótimo</span><span class="chip hi">⛔ passou do teto</span></div>
+    <div class="tablewrap"><table id="cmpPpm"><thead><tr><th>Elem</th><th class="cmpa">A</th><th class="cmpb">B</th><th>Teto</th></tr></thead><tbody></tbody></table></div>
   </div>
 
   <p class="foot" id="foot"></p>
@@ -240,43 +252,58 @@ function ecEst(p,gNC){const mK=p.K/MM.K/1e3,mCa=p.Ca/MM.Ca/1e3,mMg=p.Mg/MM.Mg/1e
 
 // ===================== DADOS =====================
 const EL=['N','P','K','Ca','Mg','S','Fe','Mn','Zn','B','Cu','Mo'];
-const FASES=['veg','s1','s2','s3','s47','s8','s9'];
-const FNOME={veg:'Vegetativo',s1:'Flor S1',s2:'Flor S2',s3:'Flor S3',s47:'Flor S4-7',s8:'Flor S8',s9:'Flor S9'};
+// fases legadas: receitas salvas antes das fases-por-receita não têm o campo 'fases'
+const FASES_LEGADO=[{k:'veg',n:'Vegetativo'},{k:'s1',n:'Flor S1'},{k:'s2',n:'Flor S2'},{k:'s3',n:'Flor S3'},{k:'s47',n:'Flor S4-7'},{k:'s8',n:'Flor S8'},{k:'s9',n:'Flor S9'}];
 const A=(...v)=>{const o={};EL.forEach((e,i)=>o[e]=v[i]);return o;};
+
+// Cada receita é um CLONE FIEL da fonte, com o calendário da própria fonte.
 const BUILTIN={
-  bcg:{nome:'Clone BCG310',builtin:true,perfis:{
-    veg:A(169,118,328,133,116,139,3.09,1.93,1.93,0.77,0.27,0.04),s1:A(169,118,328,133,116,139,3.09,1.93,1.93,0.77,0.27,0.04),
-    s2:A(117,76,211,97,74,89,2.0,1.24,1.24,0.5,0.17,0.02),s3:A(141,98,273,111,97,116,2.58,1.61,1.61,0.64,0.23,0.03),
-    s47:A(150,111,308,115,109,131,2.91,1.82,1.82,0.73,0.25,0.04),
-    s8:A(117,76,211,97,74,89,2.0,1.24,1.24,0.5,0.17,0.02),s9:A(36,70,195,0,69,83,1.83,1.15,1.15,0.46,0.16,0.02)}},
-  athena:{nome:'Clone Athena',builtin:true,perfis:{
-    veg:A(212,71,338,207,61,163,3.25,0.49,0.16,0.18,0.12,0.12),
-    s1:A(171,107,405,207,61,183,3.25,0.49,0.16,0.18,0.12,0.12),s2:A(171,107,405,207,61,183,3.25,0.49,0.16,0.18,0.12,0.12),
-    s3:A(171,107,405,207,61,183,3.25,0.49,0.16,0.18,0.12,0.12),s47:A(171,107,405,207,61,183,3.25,0.49,0.16,0.18,0.12,0.12),
-    s8:A(79,50,189,96,28,85,1.63,0.24,0.08,0.09,0.06,0.06),s9:A(79,50,189,96,28,85,1.63,0.24,0.08,0.09,0.06,0.06)}},
-  ciencia:{nome:'Ciência (lean)',builtin:true,perfis:{
-    veg:A(160,30,150,120,50,80,3,0.5,0.2,0.7,0.1,0.06),s1:A(130,30,140,130,55,80,3,0.5,0.2,0.7,0.1,0.06),
-    s2:A(150,30,165,130,55,85,3,0.5,0.2,0.7,0.1,0.06),s3:A(150,35,185,130,55,90,3,0.5,0.2,0.7,0.1,0.06),
-    s47:A(140,40,190,125,55,90,3,0.5,0.2,0.7,0.1,0.06),
-    s8:A(90,30,160,115,50,80,3,0.5,0.2,0.7,0.1,0.06),s9:A(30,10,60,60,25,40,1,0.2,0.08,0.3,0.05,0.03)}},
+  bcg:{nome:'Clone BCG310',builtin:true,
+    fases:[{k:'veg1',n:'Veg · germinação→maturidade'},{k:'veg2',n:'Veg · maturidade→flip'},{k:'f1',n:'Flor W1'},{k:'f2',n:'Flor W2'},{k:'f3',n:'Flor W3'},{k:'f47',n:'Flor W4-7'},{k:'f8',n:'Flor W8'},{k:'f9',n:'Flor W9 (finish)'}],
+    perfis:{
+      veg1:A(117,76,211,97,74,89,2.0,1.24,1.24,0.50,0.17,0.02),
+      veg2:A(169,118,328,133,116,139,3.09,1.93,1.93,0.77,0.27,0.04),
+      f1:A(169,118,328,133,116,139,3.09,1.93,1.93,0.77,0.27,0.04),
+      f2:A(117,76,211,97,74,89,2.0,1.24,1.24,0.50,0.17,0.02),
+      f3:A(141,98,273,111,97,116,2.58,1.61,1.61,0.64,0.23,0.03),
+      f47:A(150,111,308,115,109,131,2.91,1.82,1.82,0.73,0.25,0.04),
+      f8:A(117,76,211,97,74,89,2.0,1.24,1.24,0.50,0.17,0.02),
+      f9:A(36,70,195,0,69,83,1.83,1.15,1.15,0.46,0.16,0.02)}},
+  athena:{nome:'Clone Athena',builtin:true,
+    fases:[{k:'veg',n:'Vegetativo'},{k:'f17',n:'Flor W1-7'},{k:'f89',n:'Flor W8-9 (fade)'}],
+    perfis:{
+      veg:A(211,71,337,207,61,162,2.88,0.31,0.12,0.18,0.12,0.024),
+      f17:A(171,106,404,207,61,183,2.88,0.31,0.12,0.18,0.12,0.024),
+      f89:A(0,106,404,46,61,183,2.7,0.14,0.05,0.12,0.06,0.008)}},
+  bernstein:{nome:'Clone Bernstein',builtin:true,
+    fases:[{k:'ciclo',n:'Ciclo todo'}],
+    perfis:{ciclo:A(160,30,175,110,50,85,1.7,0.8,0.4,0.10,0.04,0.03)}},
+  bugbee:{nome:'Clone Bugbee',builtin:true,
+    fases:[{k:'ciclo',n:'Ciclo todo'}],
+    perfis:{ciclo:A(151,31,242,120,19,26,0.4,0.2,0.2,0.4,0.3,0.01)}},
 };
-// Clone EXATO do BCG310, só o veg com o Mg no mínimo (resto do veg = BCG). A EC do veg cai (~2,0); compensa com menos água.
-BUILTIN.bcgveg={nome:'BCG310 · veg com menos Mg',builtin:true,perfis:Object.assign(structuredClone(BUILTIN.bcg.perfis),{veg:A(169,118,328,133,50,67,3.09,1.93,1.93,0.77,0.27,0.04)})};
-// Volcani (Bernstein): solucao-base do paper de Mg (Morad & Bernstein 2023), com N e P nos otimos (Saloner 2020 N160, Shiponi 2021 P30). O grupo roda solucao ~constante o ciclo todo. Nota: com os sais disponiveis o K sobe (~244) por falta de fonte de amonio.
-BUILTIN.volcani={nome:'Volcani (Bernstein)',builtin:true,perfis:Object.fromEntries(FASES.map(f=>[f,A(160,30,175,110,50,85,1.7,0.8,0.4,0.10,0.04,0.03)]))};
-// Perfeita: razao fixa balanceada escalada pela EC do BCG310 (veg/S1 2,4; S2/S8 1,6; S3 2,0; S4-7 2,2; S9 1,0). Ca-rica p/ segurar N seguro na EC alta.
-BUILTIN.perfeita={nome:'Perfeita · EC BCG',builtin:true,perfis:{
-  veg:A(162,50,278,198,69,182,2.5,0.6,0.35,0.4,0.05,0.04),s1:A(162,50,278,198,69,182,2.5,0.6,0.35,0.4,0.05,0.04),
-  s2:A(108,34,185,132,46,121,2.5,0.6,0.35,0.4,0.05,0.04),s3:A(135,42,232,165,57,151,2.5,0.6,0.35,0.4,0.05,0.04),
-  s47:A(149,46,255,182,63,167,2.5,0.6,0.35,0.4,0.05,0.04),
-  s8:A(108,34,185,132,46,121,2.5,0.6,0.35,0.4,0.05,0.04),s9:A(68,21,116,83,29,76,1.2,0.3,0.18,0.2,0.03,0.02)}};
-const TETO={N:230,P:150,K:350,Ca:220,Mg:130,S:220,Fe:null,Mn:null,Zn:2,B:2,Cu:0.4,Mo:0.2};
+
+// Referência por elemento: faixa ótima, teto de toxicidade, procedência e legenda.
+const REF={
+  N :{otimo:[140,180],  teto:240,  fonte:'ciencia', cap:'ótimo 140–180 · dano 240–320 · ciência cannabis'},
+  P :{otimo:[20,40],    teto:null, fonte:'parcial', cap:'ótimo 30 · testado sem dano até 90 · acima disso ninguém testou'},
+  K :{otimo:[60,175],   teto:null, fonte:'ciencia', cap:'funcional 60–175 · não limitou até 240 · K não tem ótimo definido'},
+  Ca:{otimo:null,       teto:null, fonte:'nenhuma', cap:'não existe estudo de dose-resposta de Ca em cannabis'},
+  Mg:{otimo:[35,70],    teto:140,  fonte:'ciencia', cap:'ótimo 35–70 · declínio acima de 70 · dano a 140 · ciência cannabis'},
+  S :{otimo:null,       teto:null, fonte:'nenhuma', cap:'subproduto dos sulfatos · sem estudo dedicado em cannabis'},
+  Fe:{otimo:[1.7,3.5],  teto:5,    fonte:'analogia',cap:'ótimo 1,7–3,5 · teto por analogia horticultural'},
+  Mn:{otimo:[0.5,0.9],  teto:1.5,  fonte:'analogia',cap:'ótimo 0,5–0,9 · teto por analogia horticultural'},
+  Zn:{otimo:[0.1,0.4],  teto:0.5,  fonte:'analogia',cap:'ótimo 0,1–0,4 · teto por analogia · excesso reduz canabinoides'},
+  B :{otimo:[0.1,1.0],  teto:2,    fonte:'ciencia', cap:'ótimo 0,1–1,0 · toxicidade ~2 documentada em cannabis · janela estreita'},
+  Cu:{otimo:[0.03,0.18],teto:0.3,  fonte:'analogia',cap:'ótimo 0,03–0,18 · teto por analogia · Cu é dos mais fitotóxicos'},
+  Mo:{otimo:[0.02,0.1], teto:0.25, fonte:'analogia',cap:'ótimo 0,02–0,1 · teto por analogia · toxicidade rara'},
+};
 const NOMES={N:'Nitrogênio',P:'Fósforo',K:'Potássio',Ca:'Cálcio',Mg:'Magnésio',S:'Enxofre',Fe:'Ferro',Mn:'Manganês',Zn:'Zinco',B:'Boro',Cu:'Cobre',Mo:'Molibdênio'};
 const LSKEY='calda_receitas_v2';
 
 // ===================== ESTADO =====================
-let receitas={}; // id -> {nome,builtin,perfis}
-let atual='bcg', fase='s47', modo='view', draft=null;
+let receitas={}; // id -> {nome,builtin,fases:[{k,n}],perfis}
+let atual='bcg', fase='f47', modo='view', draft=null, delAlvo=null;
 let checkedSalts=new Set();
 
 const $=(s)=>document.querySelector(s),$$=(s)=>document.querySelectorAll(s);
@@ -285,7 +312,37 @@ const f2=(n)=>{if(n===0)return'0';if(n>=100)return n.toFixed(0);if(n>=10)return 
 
 function loadCustom(){ try{const j=JSON.parse(localStorage.getItem(LSKEY)||'{}');return j;}catch(e){return{};} }
 function saveCustom(){ const c={};for(const id in receitas)if(!receitas[id].builtin)c[id]=receitas[id]; try{localStorage.setItem(LSKEY,JSON.stringify(c));}catch(e){} }
-function initReceitas(){ receitas={};for(const id in BUILTIN)receitas[id]=structuredClone(BUILTIN[id]); const c=loadCustom();for(const id in c)receitas[id]=c[id]; }
+// migração: receita salva sem 'fases' assume o calendário legado (veg, S1..S9)
+function normalizar(r){
+  if(!r||typeof r!=='object')return null;
+  if(!r.perfis||typeof r.perfis!=='object')r.perfis={};
+  if(!Array.isArray(r.fases)||!r.fases.length){
+    let fs=FASES_LEGADO.filter(f=>r.perfis[f.k]);
+    if(!fs.length)fs=Object.keys(r.perfis).map(k=>({k,n:k}));
+    if(!fs.length)fs=[{k:'ciclo',n:'Ciclo todo'}];
+    r.fases=fs.map(f=>({k:f.k,n:f.n}));
+  }
+  r.fases=r.fases.filter(f=>f&&f.k);
+  r.fases.forEach(f=>{const src=r.perfis[f.k]; const p=(src&&typeof src==='object')?src:{}; EL.forEach(e=>{const v=parseFloat(p[e]); p[e]=isFinite(v)?v:0;}); r.perfis[f.k]=p;});
+  return r;
+}
+function initReceitas(){
+  receitas={};
+  for(const id in BUILTIN)receitas[id]=structuredClone(BUILTIN[id]);
+  const c=loadCustom();
+  for(const id in c){const r=normalizar(c[id]);if(r)receitas[id]=r;}
+}
+function recAtiva(){ return (modo==='view'?receitas[atual]:draft)||receitas.bcg; }
+function fasesDe(r){ return (r&&Array.isArray(r.fases)&&r.fases.length)?r.fases:FASES_LEGADO; }
+function faseNomeDe(r,k){ const f=fasesDe(r).find(x=>x.k===k); return f?f.n:k; }
+
+function fillFaseSelect(){
+  const fs=fasesDe(recAtiva()), sel=$('#fase');
+  if(!fs.some(f=>f.k===fase))fase=fs[0].k;   // fase não existe na receita nova: cai na primeira
+  sel.innerHTML='';
+  fs.forEach(f=>{const o=document.createElement('option');o.value=f.k;o.textContent=f.n;sel.appendChild(o);});
+  sel.value=fase;
+}
 
 function fillRecipeSelect(){
   const sel=$('#recipe'); sel.innerHTML='';
@@ -295,7 +352,7 @@ function fillRecipeSelect(){
   for(const id in receitas){const o=document.createElement('option');o.value=id;o.textContent=receitas[id].nome+(receitas[id].builtin?'':' ★');selB.appendChild(o);}
   selB.value=cur;
 }
-function perfilAtivo(){ return (modo==='edit'?draft:receitas[atual]).perfis[fase]; }
+function perfilAtivo(){ const r=recAtiva(); return r.perfis[fase]||r.perfis[fasesDe(r)[0].k]||A(0,0,0,0,0,0,0,0,0,0,0,0); }
 
 function buildPpmInputs(){
   const g=$('#ppmGrid');g.innerHTML='';
@@ -316,7 +373,7 @@ function setModo(m){
   $('#editor').classList.toggle('hidden',!editing);
   $('#recipe').disabled=editing;   // trava troca de receita durante a edição; fase e volume seguem ativos
   $('#btnNew').disabled=editing;
-  if(editing){ $('#edFase').textContent=FNOME[fase]; syncPpmInputs(); }
+  if(editing){ $('#edFase').textContent=faseNomeDe(recAtiva(),fase); syncPpmInputs(); }
   updEditDel();
 }
 function startNew(){ draft=structuredClone(receitas[atual]); draft.builtin=false; draft.nome=''; $('#rname').value=''; $('#edStatus').textContent='Nova receita a partir de "'+receitas[atual].nome+'"'; setModo('new'); compute(); }
@@ -326,14 +383,53 @@ function saveRecipe(){
   const nome=($('#rname').value||'').trim(); if(!nome){$('#edStatus').textContent='⚠️ Dá um nome pra receita antes de salvar.';$('#rname').focus();return;}
   let id=(modo==='edit')?atual:('r'+Object.keys(receitas).length+'_'+nome.toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,8));
   draft.nome=nome;draft.builtin=false; receitas[id]=structuredClone(draft); saveCustom();
-  atual=id;draft=null;setModo('view');fillRecipeSelect();compute();
+  atual=id;draft=null;setModo('view');fillRecipeSelect();fillFaseSelect();compute();
 }
-function delRecipe(){ if(receitas[atual].builtin)return; $('#delName').textContent=receitas[atual].nome; $('#delBar').classList.remove('hidden'); }
-function confirmDel(){ delete receitas[atual]; saveCustom(); atual='bcg'; $('#delBar').classList.add('hidden'); fillRecipeSelect(); compute(); }
-function cancelDel(){ $('#delBar').classList.add('hidden'); }
-function gotoFase(nf){ fase=nf; $('#fase').value=nf; checkedSalts.clear(); if(modo!=='view'){$('#edFase').textContent=FNOME[nf];syncPpmInputs();} compute(); }
+function delRecipe(){ if(receitas[atual].builtin)return; delAlvo=atual; $('#delName').textContent=receitas[atual].nome; $('#delBar').classList.remove('hidden'); }
+function confirmDel(){
+  if(!delAlvo||!receitas[delAlvo]||receitas[delAlvo].builtin){cancelDel();return;}
+  delete receitas[delAlvo]; if(atual===delAlvo)atual='bcg';
+  delAlvo=null; saveCustom(); $('#delBar').classList.add('hidden'); fillRecipeSelect(); fillFaseSelect(); compute();
+}
+function cancelDel(){ delAlvo=null; $('#delBar').classList.add('hidden'); }
+function gotoFase(nf){ fase=nf; $('#fase').value=nf; checkedSalts.clear(); if(modo!=='view'){$('#edFase').textContent=faseNomeDe(recAtiva(),nf);syncPpmInputs();} compute(); }
 
-function colorClass(v,ideal){const r=v/ideal;if(!isFinite(r))return'';if(r<0.85)return'lo';if(r>1.15)return'hi';return'ok';}
+// ===================== FAIXAS / BARRAS =====================
+const nnum=(x)=>br(String(+x));
+function tetoTxt(e){ const r=REF[e]; return r.teto==null?'—':(r.fonte==='analogia'?'~':'')+nnum(r.teto); }
+function statusDe(e,v){
+  const r=REF[e];
+  if(r.teto!=null&&v>r.teto)return{k:'passou',cls:'hi',rot:'passou'};
+  if(!r.otimo&&r.teto==null)return{k:'nd',cls:'nd',rot:'sem dado'};
+  if(r.otimo&&v>r.otimo[1])return{k:'alto',cls:'lo',rot:'alto'};
+  return{k:'ok',cls:'ok',rot:'ok'};
+}
+function barHtml(e,v){
+  const r=REF[e],ot=r.otimo,tt=r.teto;
+  let max=Math.max(tt!=null?tt*1.5:0, v*1.1, ot?ot[1]*1.5:0);
+  if(!(max>0))max=(v*2)||1;
+  const P=(x)=>Math.min(100,100*x/max);
+  let z='';
+  if(ot){
+    z+=`<i class="z zlo" style="left:0;width:${P(ot[0]).toFixed(1)}%"></i>`;
+    z+=`<i class="z zok" style="left:${P(ot[0]).toFixed(1)}%;width:${Math.max(0,P(ot[1])-P(ot[0])).toFixed(1)}%"></i>`;
+  }
+  if(ot&&tt!=null) z+=`<i class="z zmid" style="left:${P(ot[1]).toFixed(1)}%;width:${Math.max(0,P(tt)-P(ot[1])).toFixed(1)}%"></i>`;
+  else if(ot) z+=`<i class="z zmid" style="left:${P(ot[1]).toFixed(1)}%;width:${Math.max(0,100-P(ot[1])).toFixed(1)}%"></i>`;
+  if(tt!=null)z+=`<i class="z zhi" style="left:${P(tt).toFixed(1)}%;width:${Math.max(0,100-P(tt)).toFixed(1)}%"></i>`;
+  const s=statusDe(e,v),pos=P(v).toFixed(1);
+  return `<div class="barwrap"><span class="bal ${s.cls}" style="left:${pos}%">${br(f2(v))}</span>`+
+         `<div class="track">${z}<i class="mk" style="left:${pos}%"></i></div>`+
+         `<div class="barcap">${r.cap}</div></div>`;
+}
+// fase de B equivalente à fase atual de A: mesma chave, senão mesmo índice, senão a última
+function faseEquivalente(rb){
+  const fs=fasesDe(rb);
+  if(fs.some(f=>f.k===fase)&&rb.perfis[fase])return fase;
+  const fa=fasesDe(recAtiva());
+  let i=fa.findIndex(f=>f.k===fase); if(i<0)i=0;
+  return fs[Math.min(i,fs.length-1)].k;
+}
 
 function compute(){
   const vol=parseFloat($('#vol').value)||0;
@@ -341,7 +437,6 @@ function compute(){
   const {g,av}=solve(alvo);
   const ppm=forward(g);
   const ec=ecEst(ppm,g.NC);
-  const ideal=receitas.ciencia.perfis[fase];
 
   $('#ecVal').textContent=br(ec.toFixed(2));
   $('#ppm500').textContent=(ec*500).toFixed(0);
@@ -356,52 +451,59 @@ function compute(){
     s.forEach(x=>{const tr=document.createElement('tr');tr.innerHTML=`<td class="saln">${SAIS[x].nome}</td><td class="gl">${br(g[x].toFixed(3))}</td><td class="tot">${br((g[x]*vol).toFixed(1))} g</td><td class="chk"><input type="checkbox" data-sal="${x}" ${checkedSalts.has(x)?'checked':''}></td>`;st.appendChild(tr);});
   });
 
-  // ppm final vs ideal
+  // ppm final: alvo, final, teto, barra de toxicidade e status
   const pt=$('#ppmTable tbody');pt.innerHTML='';
   const av2=[...av];
   EL.forEach(e=>{
-    const cls=colorClass(ppm[e],ideal[e]); const over=TETO[e]!=null&&ppm[e]>TETO[e];
+    const s=statusDe(e,ppm[e]);
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td class="saln" title="${NOMES[e]}">${e}${over?' ⛔':''}</td><td class="alvo">${f2(alvo[e])}</td><td class="v ${cls}">${f2(ppm[e])}<span class="idmini">${f2(ideal[e])}</span></td>`;
+    tr.innerHTML=`<td class="saln" title="${NOMES[e]}">${e}${s.k==='passou'?' ⛔':''}</td>`+
+      `<td class="alvo">${br(f2(alvo[e]))}</td>`+
+      `<td class="v ${s.cls}">${br(f2(ppm[e]))}</td>`+
+      `<td class="gl">${tetoTxt(e)}</td>`+
+      `<td class="barcell">${barHtml(e,ppm[e])}</td>`+
+      `<td class="st"><span class="chip ${s.cls}">${s.rot}</span></td>`;
     pt.appendChild(tr);
-    if(over)av2.push({t:'err',m:`${NOMES[e]} em ${f2(ppm[e])} passou do teto real (${TETO[e]}). Reduza.`});
+    if(s.k==='passou')av2.push({t:'err',m:`${NOMES[e]} em ${br(f2(ppm[e]))} passou do teto (${tetoTxt(e)}). Reduza.`});
   });
-  // relações entre elementos (receita vs ideal)
-  const ratRows=(p)=>({npk:`${(p.N/p.K*10).toFixed(1)} : ${(p.P/p.K*10).toFixed(1)} : 10`, kcamg:(p.Mg>0?`${(p.K/p.Mg).toFixed(1)} : ${(p.Ca/p.Mg).toFixed(1)} : 1`:'—')});
-  const rR=ratRows(ppm), rI=ratRows(ideal);
+  // relações entre elementos
+  const ratRows=(p)=>({npk:`${br((p.N/p.K*10).toFixed(1))} : ${br((p.P/p.K*10).toFixed(1))} : 10`, kcamg:(p.Mg>0?`${br((p.K/p.Mg).toFixed(1))} : ${br((p.Ca/p.Mg).toFixed(1))} : 1`:'—')});
+  const rR=ratRows(ppm);
   $('#ratTable tbody').innerHTML=
-    `<tr><td class="saln">N : P : K <span class="gl">(K=10)</span></td><td class="v">${rR.npk}</td><td class="gl">${rI.npk}</td></tr>`+
-    `<tr><td class="saln">K : Ca : Mg <span class="gl">(Mg=1)</span></td><td class="v">${rR.kcamg}</td><td class="gl">${rI.kcamg}</td></tr>`+
-    `<tr><td class="gl" style="font-weight:400">nota</td><td colspan="2" class="gl" style="text-align:left">A ciência não define razão ideal p/ cannabis (o 4:2:1 é heurística de floricultura, não Bugbee). Âncoras reais são elementos: N~160, P~30, Mg~35-50; K não tem ótimo.</td></tr>`;
-  if(ppm.Mg>70&&ppm.Mg<=130)av2.push({t:'warn',m:`Mg em ${ppm.Mg.toFixed(0)}: acima do ponto de declínio (70), seguro. Dano claro só a 140.`});
+    `<tr><td class="saln">N : P : K <span class="gl">(K=10)</span></td><td class="v">${rR.npk}</td></tr>`+
+    `<tr><td class="saln">K : Ca : Mg <span class="gl">(Mg=1)</span></td><td class="v">${rR.kcamg}</td></tr>`+
+    `<tr><td class="gl" style="font-weight:400">nota</td><td class="gl" style="text-align:left;white-space:normal">A ciência não define razão ideal p/ cannabis. O 4:2:1 vem da floricultura de poinsétia (NC State/Whipker), não do Bugbee. O Bugbee roda K:Ca:Mg ~12,7:6,3:1 e diz que razão é consequência, não regra. Âncoras reais são elementos: N~160, P~30, Mg~35-70; K não tem ótimo.</td></tr>`;
+  if(ppm.Mg>70&&ppm.Mg<=REF.Mg.teto)av2.push({t:'warn',m:`Mg em ${ppm.Mg.toFixed(0)}: acima do ponto de declínio (70), seguro. Dano claro só a 140.`});
   const avEl=$('#avisos');avEl.innerHTML='';
   av2.forEach(a=>{const d=document.createElement('div');d.className='aviso'+(a.t==='warn'?' warn':'');d.textContent=(a.t==='warn'?'⚠️ ':'⛔ ')+a.m;avEl.appendChild(d);});
 
   // comparação A vs B
   const bId=$('#recipeB').value;
   if(bId&&receitas[bId]){
-    const bsol=solve(receitas[bId].perfis[fase]),bPpm=forward(bsol.g),bEc=ecEst(bPpm,bsol.g.NC);
-    $('#cmpTitle').textContent=receitas[atual].nome+' (A) × '+receitas[bId].nome+' (B)';
-    $('#cmpEc').innerHTML=`<b>A</b> ${receitas[atual].nome}: EC ${br(ec.toFixed(2))} &nbsp;·&nbsp; <b>B</b> ${receitas[bId].nome}: EC ${br(bEc.toFixed(2))} <span style="opacity:.7">(fase ${FNOME[fase]})</span>`;
-    $$('.cmpa').forEach(e=>e.textContent='A · '+receitas[atual].nome);
-    $$('.cmpb').forEach(e=>e.textContent='B · '+receitas[bId].nome);
-    const rr=(p)=>({npk:`${(p.N/p.K*10).toFixed(1)} : ${(p.P/p.K*10).toFixed(1)} : 10`,kcamg:p.Mg>0?`${(p.K/p.Mg).toFixed(1)} : ${(p.Ca/p.Mg).toFixed(1)} : 1`:'—'});
-    const ra=rr(ppm),rb=rr(bPpm),ri=rr(ideal);
+    const recB=receitas[bId], faseB=faseEquivalente(recB);
+    const bsol=solve(recB.perfis[faseB]),bPpm=forward(bsol.g),bEc=ecEst(bPpm,bsol.g.NC);
+    const nomeA=recAtiva().nome||receitas[atual].nome;
+    $('#cmpTitle').textContent=nomeA+' (A) × '+recB.nome+' (B)';
+    $('#cmpEc').innerHTML=`<b>A</b> ${nomeA}: EC ${br(ec.toFixed(2))} <span style="opacity:.7">(${faseNomeDe(recAtiva(),fase)})</span> &nbsp;·&nbsp; <b>B</b> ${recB.nome}: EC ${br(bEc.toFixed(2))} <span style="opacity:.7">(${faseNomeDe(recB,faseB)})</span>`;
+    $$('.cmpa').forEach(e=>e.textContent='A · '+nomeA);
+    $$('.cmpb').forEach(e=>e.textContent='B · '+recB.nome);
+    const rr=(p)=>({npk:`${br((p.N/p.K*10).toFixed(1))} : ${br((p.P/p.K*10).toFixed(1))} : 10`,kcamg:p.Mg>0?`${br((p.K/p.Mg).toFixed(1))} : ${br((p.Ca/p.Mg).toFixed(1))} : 1`:'—'});
+    const ra=rr(ppm),rb=rr(bPpm);
     $('#cmpRat tbody').innerHTML=
-      `<tr><td class="saln">N : P : K</td><td class="v">${ra.npk}</td><td class="v">${rb.npk}</td><td class="gl">${ri.npk}</td></tr>`+
-      `<tr><td class="saln">K : Ca : Mg</td><td class="v">${ra.kcamg}</td><td class="v">${rb.kcamg}</td><td class="gl">${ri.kcamg}</td></tr>`;
-    $('#cmpPpm tbody').innerHTML=EL.map(e=>{const ca=colorClass(ppm[e],ideal[e]),cb=colorClass(bPpm[e],ideal[e]);return `<tr><td class="saln">${e}</td><td class="v ${ca}">${f2(ppm[e])}</td><td class="v ${cb}">${f2(bPpm[e])}</td><td class="gl">${f2(ideal[e])}</td></tr>`;}).join('');
+      `<tr><td class="saln">N : P : K</td><td class="v">${ra.npk}</td><td class="v">${rb.npk}</td></tr>`+
+      `<tr><td class="saln">K : Ca : Mg</td><td class="v">${ra.kcamg}</td><td class="v">${rb.kcamg}</td></tr>`;
+    $('#cmpPpm tbody').innerHTML=EL.map(e=>{const sa=statusDe(e,ppm[e]),sb=statusDe(e,bPpm[e]);return `<tr><td class="saln">${e}</td><td class="v ${sa.cls}">${br(f2(ppm[e]))}</td><td class="v ${sb.cls}">${br(f2(bPpm[e]))}</td><td class="gl">${tetoTxt(e)}</td></tr>`;}).join('');
     $('#compareCard').classList.remove('hidden');
   } else { $('#compareCard').classList.add('hidden'); }
 
   updEditDel();
-  $('#foot').textContent=`EC estimada por modelo de condutividade (±10-15%). Sais em fração elemental padrão (confira o rótulo real dos seus). "Ideal" = ótimo da ciência (Saloner, Shiponi, Bugbee). ★ = suas receitas salvas. Medir EC e pH na hora continua sendo a verdade.`;
+  $('#foot').textContent=`EC estimada por modelo de condutividade (±10-15%). Sais em fração elemental padrão (confira o rótulo real dos seus). ★ = suas receitas salvas. Barras: faixa ótima e teto por elemento (ver legenda de cada um). Medir EC e pH na hora continua sendo a verdade.`;
 }
 
 // ===================== EVENTOS =====================
-$('#recipe').addEventListener('change',e=>{atual=e.target.value;checkedSalts.clear();compute();});
+$('#recipe').addEventListener('change',e=>{cancelDel();atual=e.target.value;checkedSalts.clear();fillFaseSelect();compute();});
 $('#recipeB').addEventListener('change',compute);
-$('#fase').addEventListener('change',e=>{fase=e.target.value;checkedSalts.clear();if(modo!=='view'){$('#edFase').textContent=FNOME[fase];syncPpmInputs();}compute();});
+$('#fase').addEventListener('change',e=>{fase=e.target.value;checkedSalts.clear();if(modo!=='view'){$('#edFase').textContent=faseNomeDe(recAtiva(),fase);syncPpmInputs();}compute();});
 $('#salTable').addEventListener('change',e=>{const c=e.target;if(c.matches('input[type=checkbox]')){if(c.checked)checkedSalts.add(c.dataset.sal);else checkedSalts.delete(c.dataset.sal);}});
 $('#clearChk').addEventListener('click',()=>{checkedSalts.clear();compute();});
 $('#vol').addEventListener('input',compute);
@@ -412,12 +514,13 @@ $('#btnSave').addEventListener('click',saveRecipe);
 $('#btnCancel').addEventListener('click',cancelEdit);
 $('#delYes').addEventListener('click',confirmDel);
 $('#delNo').addEventListener('click',cancelDel);
-$('#prevFase').addEventListener('click',()=>{const i=FASES.indexOf(fase);gotoFase(FASES[(i-1+FASES.length)%FASES.length]);});
-$('#nextFase').addEventListener('click',()=>{const i=FASES.indexOf(fase);gotoFase(FASES[(i+1)%FASES.length]);});
+function andarFase(d){const fs=fasesDe(recAtiva());let i=fs.findIndex(f=>f.k===fase);if(i<0)i=0;gotoFase(fs[(i+d+fs.length)%fs.length].k);}
+$('#prevFase').addEventListener('click',()=>andarFase(-1));
+$('#nextFase').addEventListener('click',()=>andarFase(1));
 $('#btnBackup').addEventListener('click',()=>{const c={};for(const id in receitas)if(!receitas[id].builtin)c[id]=receitas[id];$('#expTxt').value=Object.keys(c).length?JSON.stringify(c):'(nenhuma receita sua salva ainda)';$('#backupBar').classList.toggle('hidden');$('#copyMsg').textContent='';$('#impMsg').textContent='';});
 $('#btnBackupClose').addEventListener('click',()=>$('#backupBar').classList.add('hidden'));
 $('#btnCopy').addEventListener('click',()=>{const t=$('#expTxt');t.select();t.setSelectionRange(0,99999);let ok=false;try{navigator.clipboard.writeText(t.value);ok=true;}catch(e){try{ok=document.execCommand('copy');}catch(e2){}}$('#copyMsg').textContent=ok?'copiado ✓':'selecione e copie manual';});
-$('#btnImport').addEventListener('click',()=>{try{const o=JSON.parse(($('#impTxt').value||'').trim());let n=0;for(const id in o){if(o[id]&&o[id].perfis&&o[id].nome){o[id].builtin=false;receitas[id]=o[id];n++;}}if(!n){$('#impMsg').textContent='nenhuma receita válida no texto';return;}saveCustom();fillRecipeSelect();$('#impMsg').textContent=n+' receita(s) importada(s) ✓';}catch(e){$('#impMsg').textContent='texto inválido, confira o backup';}});
+$('#btnImport').addEventListener('click',()=>{try{const o=JSON.parse(($('#impTxt').value||'').trim());let n=0;for(const id in o){if(o[id]&&o[id].perfis&&o[id].nome){let nid=id;if(BUILTIN[nid])nid='imp_'+nid;o[id].builtin=false;const rn=normalizar(o[id]);if(rn){receitas[nid]=rn;n++;}}}if(!n){$('#impMsg').textContent='nenhuma receita válida no texto';return;}saveCustom();fillRecipeSelect();fillFaseSelect();compute();$('#impMsg').textContent=n+' receita(s) importada(s) ✓';}catch(e){$('#impMsg').textContent='texto inválido, confira o backup';}});
 $('#applyEc').addEventListener('click',()=>{
   const alvoEc=parseFloat($('#ecalvo').value);if(!alvoEc||!draft)return;
   const {g}=solve(draft.perfis[fase]);const ec=ecEst(forward(g),g.NC);if(ec<=0)return;
@@ -426,6 +529,6 @@ $('#applyEc').addEventListener('click',()=>{
 });
 
 // init
-initReceitas();fillRecipeSelect();buildPpmInputs();setModo('view');compute();
+initReceitas();if(!receitas[atual])atual='bcg';fillRecipeSelect();fillFaseSelect();buildPpmInputs();setModo('view');compute();
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
