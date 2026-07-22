@@ -75,6 +75,7 @@
   .tablewrap{overflow-x:auto}
   #ppmTable{min-width:560px}
   #ppmTable th,#ppmTable td{padding:7px 8px;vertical-align:top}
+  #ppmTable td:nth-child(4){white-space:nowrap;font-size:.82rem}
   td.barcell{text-align:left}
   .barwrap{position:relative;min-width:170px;padding-top:17px}
   .track{position:relative;height:11px;border-radius:6px;background:var(--line);overflow:hidden}
@@ -203,8 +204,8 @@
     <details class="card sec" data-sec="res">
       <summary><h2>Resultado · onde cada elemento caiu</h2><span class="chev" aria-hidden="true">▸</span></summary>
       <div class="legend">
-        <span class="chip ok">verde = faixa ótima</span><span class="chip lo">acima do ótimo</span><span class="chip hi">⛔ passou do teto</span><span class="chip chipmid">na barra: acima do ótimo, ainda abaixo do teto</span>
-        <span>acima do ótimo ≠ tóxico · cinza = sem dado · <b>todo teto vem de estudo em cannabis</b> (~ = limiar aproximado). Ca, S, P, K e Mo aparecem com — porque ninguém mediu onde começa o dano.</span>
+        <span class="chip ok">verde = ótimo ou testado sem dano</span><span class="chip lo">acima do ótimo</span><span class="chip hi">⛔ passou do teto</span><span class="chip chipmid">na barra: acima do ótimo, ainda abaixo do teto</span>
+        <span>acima do ótimo ≠ tóxico · <b>todo teto vem de estudo em cannabis</b> (~ = limiar aproximado). No <b>Ca</b> e no <b>S</b> o verde é o nível onde a planta foi testada sem dano; o cinza acima dele é território <b>não medido</b>, não território seguro. Ca, S, P, K e Mo não têm teto porque ninguém mediu onde começa o dano.</span>
       </div>
       <div class="tablewrap"><table id="ppmTable"><thead><tr><th>Elem.</th><th>Alvo</th><th>Final</th><th>Teto</th><th style="text-align:left">Onde caiu</th><th>status</th></tr></thead><tbody></tbody></table></div>
       <div class="avisos" id="avisos"></div>
@@ -302,19 +303,20 @@ const BUILTIN={
 };
 
 // Referência por elemento: faixa ótima, teto de toxicidade, procedência e legenda.
+// tetoLabel = texto da coluna Teto quando não há número. seguro = nível testado sem dano (pinta verde).
 const REF={
   N :{otimo:[140,180],  teto:240,  fonte:'ciencia', cap:'ótimo 140–180 · dano 240–320 · Saloner 2020'},
-  P :{otimo:[20,40],    teto:null, fonte:'parcial', cap:'ótimo 30 · sem dano até 90 · acima ninguém testou · Shiponi 2021'},
-  K :{otimo:[60,175],   teto:null, fonte:'ciencia', cap:'funcional 60–175 · não limitou até 240 · Saloner 2022'},
-  Ca:{otimo:null,       teto:null, fonte:'nenhuma', cap:'não existe estudo de dose-resposta de Ca em cannabis'},
+  P :{otimo:[20,40],    teto:null, tetoLabel:'s/ dano até 90', fonte:'parcial', cap:'ótimo 30 · testado sem dano até 90 · acima ninguém testou · Shiponi 2021'},
+  K :{otimo:[60,175],   teto:null, tetoLabel:'s/ dano até 240', fonte:'ciencia', cap:'funcional 60–175 · não limitou até 240 · acima ninguém testou · Saloner 2022'},
+  Ca:{otimo:null, seguro:120, teto:null, tetoLabel:'sem estudo', fonte:'nenhuma', cap:'ninguém mediu onde o Ca começa a fazer mal em cannabis · testada sem dano até ~120 (Bernstein, McGill)'},
   Mg:{otimo:[35,70],    teto:140,  fonte:'ciencia', cap:'ótimo 35–70 · declínio acima de 70 · dano a 140 · Morad 2023'},
-  S :{otimo:null,       teto:null, fonte:'nenhuma', cap:'subproduto dos sulfatos · sem estudo dedicado em cannabis'},
+  S :{otimo:null, seguro:100, teto:null, tetoLabel:'sem estudo', fonte:'nenhuma', cap:'ninguém mediu onde o S começa a fazer mal · testada sem dano até ~100 · subproduto dos sulfatos'},
   Fe:{otimo:[1.7,4],    teto:16,   fonte:'aprox',   cap:'ótimo 1,7–4 · 12–14 sem dano na floração (Frontiers 2024)'},
   Mn:{otimo:[0.5,1.0],  teto:4,    fonte:'aprox',   cap:'ótimo 0,5–1 · seguro a 2 · tóxico a 9,9 (Cockson 2019)'},
   Zn:{otimo:[0.1,0.4],  teto:4,    fonte:'ciencia', cap:'ótimo ~0,35 p/ canabinoide · acima disso THCA e CBDA caem · toxicidade só a 4 (Bernstein 2026)'},
   B :{otimo:[0.5,1.0],  teto:4.5,  fonte:'aprox',   cap:'ótimo 0,5–1 · seguro a 2 · tóxico a 4,87 (Cockson 2019) · janela estreita'},
   Cu:{otimo:[0.05,0.2], teto:0.8,  fonte:'aprox',   cap:'ótimo 0,05–0,2 · seguro a 0,38 · tóxico a 1,27'},
-  Mo:{otimo:[0.01,0.05],teto:null, fonte:'nenhuma', cap:'ótimo 0,01–0,05 · nunca testado acima de 0,04 em cannabis'},
+  Mo:{otimo:[0.01,0.05],teto:null, tetoLabel:'sem estudo', fonte:'nenhuma', cap:'ótimo 0,01–0,05 · nunca testado acima de 0,04 em cannabis'},
 };
 const NOMES={N:'Nitrogênio',P:'Fósforo',K:'Potássio',Ca:'Cálcio',Mg:'Magnésio',S:'Enxofre',Fe:'Ferro',Mn:'Manganês',Zn:'Zinco',B:'Boro',Cu:'Cobre',Mo:'Molibdênio'};
 const LSKEY='calda_receitas_v2';
@@ -414,23 +416,28 @@ function gotoFase(nf){ fase=nf; $('#fase').value=nf; checkedSalts.clear(); if(mo
 
 // ===================== FAIXAS / BARRAS =====================
 const nnum=(x)=>br(String(+x));
-function tetoTxt(e){ const r=REF[e]; return r.teto==null?'—':((r.fonte==='analogia'||r.fonte==='aprox')?'~':'')+nnum(r.teto); }
+function tetoTxt(e){ const r=REF[e]; if(r.tetoLabel)return r.tetoLabel; return r.teto==null?'—':((r.fonte==='analogia'||r.fonte==='aprox')?'~':'')+nnum(r.teto); }
 function statusDe(e,v){
   const r=REF[e];
   if(r.teto!=null&&v>r.teto)return{k:'passou',cls:'hi',rot:'passou'};
-  if(!r.otimo&&r.teto==null)return{k:'nd',cls:'nd',rot:'sem dado'};
   if(r.otimo&&v>r.otimo[1])return{k:'alto',cls:'lo',rot:'alto'};
-  return{k:'ok',cls:'ok',rot:'ok'};
+  if(r.otimo)return{k:'ok',cls:'ok',rot:'ok'};
+  // sem faixa ótima: Ca e S têm "seguro observado"; abaixo dele = seguro, acima = não medido
+  if(r.seguro!=null)return v<=r.seguro?{k:'seg',cls:'ok',rot:'seguro'}:{k:'nd',cls:'nd',rot:'não medido'};
+  return{k:'nd',cls:'nd',rot:'sem dado'};
 }
 function barHtml(e,v){
-  const r=REF[e],ot=r.otimo,tt=r.teto;
-  let max=Math.max(tt!=null?tt*1.5:0, v*1.1, ot?ot[1]*1.5:0);
+  const r=REF[e],ot=r.otimo,tt=r.teto,sg=r.seguro;
+  let max=Math.max(tt!=null?tt*1.5:0, v*1.1, ot?ot[1]*1.5:0, sg!=null?sg*1.3:0);
   if(!(max>0))max=(v*2)||1;
   const P=(x)=>Math.min(100,100*x/max);
   let z='';
   if(ot){
     z+=`<i class="z zlo" style="left:0;width:${P(ot[0]).toFixed(1)}%"></i>`;
     z+=`<i class="z zok" style="left:${P(ot[0]).toFixed(1)}%;width:${Math.max(0,P(ot[1])-P(ot[0])).toFixed(1)}%"></i>`;
+  } else if(sg!=null){
+    // Ca e S: verde = nível testado sem dano; acima fica cinza (não medido)
+    z+=`<i class="z zok" style="left:0;width:${P(sg).toFixed(1)}%"></i>`;
   }
   if(ot&&tt!=null) z+=`<i class="z zmid" style="left:${P(ot[1]).toFixed(1)}%;width:${Math.max(0,P(tt)-P(ot[1])).toFixed(1)}%"></i>`;
   else if(ot) z+=`<i class="z zmid" style="left:${P(ot[1]).toFixed(1)}%;width:${Math.max(0,100-P(ot[1])).toFixed(1)}%"></i>`;
