@@ -1,8 +1,8 @@
 // GERADO por build-app.mjs. Nao edite a mao.
-// Versao: 4e08b92711ef
+// Versao: 9fbf8188f56d
 // HTML: network-first (atualiza sozinho quando online, cai no cache se offline).
 // Estaticos: cache-first (icones e manifest nao mudam).
-const CACHE = 'calda-4e08b92711ef';
+const CACHE = 'calda-9fbf8188f56d';
 const ASSETS = [
   './', './index.html', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './icon-180.png'
